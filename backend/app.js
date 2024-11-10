@@ -28,6 +28,9 @@ import { updateInstagramPostData } from './controllers/extracter.js';
 import NewUserRoutes from './routes/NewAuth/users.js';
 import NewAuthRoutes from './routes/NewAuth/auth.js';
 
+import CustomerService from './routes/Support/Support.js';
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -65,6 +68,7 @@ app.use('/Brand', campaign);
 app.use('/api/users', search);
 app.use('/api/messages', chatRoutes);
 app.use('/api/groups', groupRoutes);
+app.use('/Support',CustomerService)
 
 const checkFirebaseConnection = async () => {
   try {

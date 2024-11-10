@@ -9,7 +9,7 @@ const WD = () => {
 
   return (
     <div className="sm:grid sm:grid-cols-12">
-      <div className="col-span-12 lg:col-span-10">
+      <div className="col-span-12">
         {/* Giving gap of h-1 */}
         <div className="bg-gray-200/90 h-1"></div>
 
@@ -22,7 +22,6 @@ const WD = () => {
         <Outlet />
       </div>
 
-      <NotificationRightBar />
     </div>
   );
 };
