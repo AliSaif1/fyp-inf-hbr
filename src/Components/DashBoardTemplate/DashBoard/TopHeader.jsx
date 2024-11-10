@@ -2,6 +2,8 @@ import { useLayoutEffect, useState, useEffect, useRef } from 'react';
 import { motion, MotionConfig } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import UserIssue from './UserIssuePage/UserIssue';
+
 
 const TopHeader = ({ SideBar, setSideBar, Pages, activeButton }) => {
   // Removing the / from the Pages to display the Correct Name
@@ -14,6 +16,7 @@ const TopHeader = ({ SideBar, setSideBar, Pages, activeButton }) => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate(); // Use navigate for redirection
   const [user, setUser] = useState(null); // State to store user data
+  const [userIssue, setUserIssue] = useState(false); // State to store user data
 
   // Fetch user data from API
   useEffect(() => {
@@ -75,10 +78,16 @@ const TopHeader = ({ SideBar, setSideBar, Pages, activeButton }) => {
     setIsDropdownOpen(false); // Close the dropdown
     navigate('/Settings'); // Pass user data in state
   };
+  const handleHelpClick = () => {
+    // setIsDropdownOpen(false); // Close the dropdown
+  setUserIssue(true)
+  };
 
   return (
-    <div className='w-full h-[60px] bg-white flex items-center'> {/* Dashboard Top Heading */}
-      <div className='poppins-semibold mx-10 flex justify-between w-full rounded-full items-center'>
+   <>
+<div className='z-20'>
+<div className='w-full h-[60px] bg-white flex items-center'> {/* Dashboard Top Heading */}
+      <div className='poppins-semibold mx-10 flex justify-between w-full rounded-full items-center '>
         <div className='flex items-center'>
           <MotionConfig transition={{ duration: 0.5 }}>
             <div
@@ -116,7 +125,7 @@ const TopHeader = ({ SideBar, setSideBar, Pages, activeButton }) => {
             <div
               ref={dropdownRef}
               id="dropdownDivider"
-              className="z-10 absolute right-0 bg-white divide-y divide-orange-100 rounded-lg shadow w-44 text-black dark:divide-orange-600 border-2 border-[#FB773F] text-[12px] mt-2"
+              className="z-20 absolute right-0 bg-white divide-y divide-orange-100 rounded-lg shadow w-44 text-black dark:divide-orange-600 border-2 border-[#FB773F] text-[12px] mt-2"
             >
               <ul className="py-2 text-black" aria-labelledby="dropdownDividerButton">
                 <li>
@@ -126,6 +135,9 @@ const TopHeader = ({ SideBar, setSideBar, Pages, activeButton }) => {
                 </li>
                 <li>
                   <a href="#" className="block px-4 py-2 hover:bg-orange-100" onClick={handleSettingsClick}>Settings</a>
+                </li>
+                <li>
+                  <a href="#" className="block px-4 py-2 hover:bg-orange-100" onClick={handleHelpClick}>Help</a>
                 </li>
               </ul>
               <div className="py-2">
@@ -141,6 +153,11 @@ const TopHeader = ({ SideBar, setSideBar, Pages, activeButton }) => {
         </div>
       </div>
     </div>
+
+    {userIssue && <UserIssue onCloseIssue={setUserIssue}/>}
+</div>
+   </>
+
   );
 }
 

@@ -28,7 +28,7 @@ import Settings from '../../Components/DashBoardTemplate/DashBoard/Settings';
 
 const MainBar = () => {
   return (
-    <div className='w-full bg-gray-200/90 h-full'>
+    <div className='w-full bg-gray-200/90 h-full z-1'>
       <Routes>
         <Route index element={<Home />} />
         

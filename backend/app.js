@@ -29,6 +29,7 @@ import NewUserRoutes from './routes/NewAuth/users.js';
 import NewAuthRoutes from './routes/NewAuth/auth.js';
 
 import CustomerService from './routes/Support/Support.js';
+import Issues from './routes/Support/Issues.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -69,6 +70,7 @@ app.use('/api/users', search);
 app.use('/api/messages', chatRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/Support',CustomerService)
+app.use("/api/issues",Issues );
 
 const checkFirebaseConnection = async () => {
   try {

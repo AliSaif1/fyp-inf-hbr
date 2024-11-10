@@ -56,7 +56,7 @@ const Home = () => {
   return (
     <>
       <div className="sm:grid sm:grid-cols-12">
-        <div className="px-6 py-3 col-span-12 lg:col-span-9">
+        <div className="px-6 py-3 col-span-12 lg:col-span-9 z-10">
           <div>
             <h1 className="lato-bold text-xl">Welcome, {profileData.brandName || 'User'}</h1>
           </div>

@@ -70,7 +70,7 @@ const Home = () => {
   return (
     <>
       <div className="sm:grid sm:grid-cols-12 lg:flex lg:w-[900px] lg:mx-auto">
-        <div className="px-6 py-3 col-span-12 lg:col-span-9">
+        <div className="px-6 py-3 col-span-12 lg:col-span-9 z-10">
           <ProfileInformation {...profileData} />
           <ul className="flex text-[10px] justify-end xs:justify-center sm:text-base sm:justify-center list-none mt-7">
             <div className="navBgColor hidden xs:flex rounded-full xs:py-2 xs:px-2 sm:flex-nowrap md:px-10 lg:gap-x-4">
