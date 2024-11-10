@@ -103,7 +103,7 @@ const BlogPost = ({ Title, Body, Time, Image, blogID }) => {
   };
 
   return (
-    <div className="bg-white mx-auto sm:w-[500px] mdm:w-[600px] lg:w-[700px] rounded-xl p-2 text-[9px] xs:text-[10px] sm:text-[13px] md:text-[11px] relative">
+    <div className="bg-white mx-auto sm:w-[500px] mdm:w-[600px] lg:w-[700px] rounded-xl p-2 text-[9px] xs:text-[10px] sm:text-[13px] md:text-[11px] relative ">
       <div className="p-2 grid grid-cols-12">
         <div className="col-span-9">
           <p className="text-[12px] mdm:text-lg lato-bold">{Title}</p>

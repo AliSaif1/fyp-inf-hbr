@@ -5,6 +5,7 @@ const Search = () => {
   const [paymentAccount, setPaymentAccount] = useState('');
   const [accountHolderName, setAccountHolderName] = useState('');
   const [bankName, setBankName] = useState('');
+  // const [bankAccountNumber, setBankAccountNumber] = useState(''); 
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [message, setMessage] = useState('');
   const [accounts, setAccounts] = useState([]);
@@ -46,79 +47,120 @@ const Search = () => {
 
     fetchData();
   }, []);
-
   const handleAddPaymentAccount = async () => {
-    if (paymentAccount && accountHolderName && bankName) {
-      const newAccount = { paymentAccount, accountHolderName, bankName };
-
-      try {
-        const authToken = localStorage.getItem('authToken');
-        const response = await fetch('/api/addPaymentAccount', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`,
-          },
-          body: JSON.stringify(newAccount),
-        });
-
-        if (response.ok) {
-          setAccounts((prevAccounts) => [...prevAccounts, newAccount]);
-          setMessage(`Payment account ${paymentAccount} added successfully.`);
-          setPaymentAccount('');
-          setAccountHolderName('');
-          setBankName('');
-        } else {
-          setMessage('Failed to add payment account. Please try again.');
-        }
-      } catch (error) {
-        setMessage('An error occurred while adding the payment account.');
-      }
-    } else {
+    // Check if all fields are filled first
+    if (!paymentAccount || !accountHolderName || !bankName) {
       setMessage('Please fill in all fields to add the payment account.');
+      return;
+    }
+  
+    // Validate Account Holder Name (should only contain letters and spaces)
+    const nameRegex = /^[A-Za-z\s]+$/; 
+    if (!nameRegex.test(accountHolderName)) {
+      setMessage('Account holder name should only contain letters and spaces.');
+      return;
+    }
+  
+    // Validate Account Holder Name length (at least 8 characters)
+    if (accountHolderName.length < 8) {
+      setMessage('Account holder name must be at least 8 characters long.');
+      return;
+    }
+  
+    // Validate Bank Name (ensure a bank is selected)
+    if (!bankName) {
+      setMessage('Please select a bank.');
+      return;
+    }
+  
+    // Validate Payment Account Number (must be exactly 16 digits and contain only numbers)
+    const accountNumberRegex = /^\d{16}$/;
+    if (!accountNumberRegex.test(paymentAccount)) {
+      setMessage('Payment account number must be exactly 16 digits with no letters.');
+      return;
+    }
+  
+    const newAccount = { paymentAccount, accountHolderName, bankName };
+  
+    try {
+      const authToken = localStorage.getItem('authToken');
+      if (!authToken) {
+        setMessage('Authentication token is missing. Please log in.');
+        return;
+      }
+  
+      const response = await fetch('/api/addPaymentAccount', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify(newAccount),
+      });
+  
+      if (response.ok) {
+        setAccounts((prevAccounts) => [...prevAccounts, newAccount]);
+        setMessage(`Payment account ${paymentAccount} added successfully.`);
+        setPaymentAccount('');
+        setAccountHolderName('');
+        setBankName('');
+      } else {
+        setMessage('Failed to add payment account. Please try again.');
+      }
+    } catch (error) {
+      setMessage('An error occurred while adding the payment account.');
     }
   };
-
   const handleRequestWithdrawal = () => {
     if (withdrawalAmount && selectedAccount) {
-      if (parseFloat(withdrawalAmount) > earnings) {
-        setMessage("Withdrawal amount can't be greater than available earnings.");
-      } else {
-        // Prepare the request data
-        const requestData = {
-          accountID: selectedAccount, // Use the selected account's _id
-          amount: parseFloat(withdrawalAmount),
-        };
-
-        // Use Fetch API to make the request
-        fetch('/api/addWithdrawalRequest', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Pass the auth token from localStorage
-          },
-          body: JSON.stringify(requestData),
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
-          }
-          return response.json();
-        })
-        .then(data => {
-          // Handle the successful response
-          setMessage(`Withdrawal request of $${withdrawalAmount} submitted successfully to ${selectedAccount}.`);
-          setWithdrawalAmount(''); // Clear the input field
-        })
-        .catch(error => {
-          // Handle any errors
-          setMessage('An error occurred while submitting the withdrawal request: ' + error.message);
-        });
+      const amount = parseFloat(withdrawalAmount);
+  
+      // Check if the withdrawal amount is less than $10
+      if (amount < 10) {
+        setMessage("Withdrawal amount must be at least $10.");
+        return;
       }
+  
+      // Check if the withdrawal amount is greater than available earnings
+      if (amount > earnings) {
+        setMessage("Withdrawal amount can't be greater than available earnings.");
+        return;
+      }
+  
+      // Prepare the request data
+      const requestData = {
+        accountID: selectedAccount, // Use the selected account's _id
+        amount: amount,
+      };
+  
+      // Use Fetch API to make the request
+      fetch('/api/addWithdrawalRequest', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Pass the auth token from localStorage
+        },
+        body: JSON.stringify(requestData),
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Handle the successful response
+        setMessage(`Withdrawal request of $${withdrawalAmount} submitted successfully to ${selectedAccount}.`);
+        setWithdrawalAmount(''); // Clear the input field
+      })
+      .catch(error => {
+        // Handle any errors
+        setMessage('An error occurred while submitting the withdrawal request: ' + error.message);
+      });
     } else {
       setMessage('Please enter a valid amount for withdrawal and select an account.');
     }
-  };  
+  };
   
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-5">
@@ -143,15 +185,21 @@ const Search = () => {
               />
             </div>
             <div className="mb-5">
-              <label className="block text-gray-700 mb-2 font-medium">Bank Name:</label>
-              <input
-                type="text"
+              <label className="block text-gray-700 mb-2 font-medium">Select Bank:</label>
+              <select
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
-                placeholder="Enter your bank name"
                 className="border border-gray-300 p-3 w-full rounded-md focus:outline-none focus:ring focus:ring-blue-300"
-              />
+              >
+                <option value="">-- Select Bank --</option>
+                <option value="Faysal Bank">Faysal Bank</option>
+                <option value="HBL Limited Bank">HBL Limited Bank</option>
+                <option value="Alphala Bank">Alphala Bank</option>
+                <option value="Habib Bank">Habib Bank</option>
+                <option value="Allied Bank">Allied Bank</option>
+              </select>
             </div>
+
             <div className="mb-5">
               <label className="block text-gray-700 mb-2 font-medium">Payment Account Number:</label>
               <input
@@ -180,31 +228,40 @@ const Search = () => {
               >
                 <option value="">-- Select Account --</option>
                 {accounts.map((account) => (
-                  <option key={account._id} value={account._id}> {/* Use account._id */}
-                    {account.accountHolderName} - {account.paymentAccount} ({account.bankName})
+                  <option key={account.paymentAccount} value={account.paymentAccount}>
+                    {account.paymentAccount}
                   </option>
                 ))}
               </select>
             </div>
+          </>
+        )}
+
+        {accounts.length > 0 && (
+          <>
             <div className="mb-5">
               <label className="block text-gray-700 mb-2 font-medium">Withdrawal Amount:</label>
               <input
                 type="number"
                 value={withdrawalAmount}
                 onChange={(e) => setWithdrawalAmount(e.target.value)}
-                placeholder="Enter amount to withdraw"
-                className="border border-gray-300 p-3 w-full rounded-md focus:outline-none focus:ring focus:ring-green-300"
+                placeholder="Enter withdrawal amount"
+                className="border border-gray-300 p-3 w-full rounded-md focus:outline-none focus:ring focus:ring-blue-300"
               />
-              <button
-                onClick={handleRequestWithdrawal}
-                className="bg-green-600 text-white p-3 mt-2 w-full rounded-md hover:bg-green-700 transition duration-200"
-              >
-                Request Withdrawal
-              </button>
             </div>
+
+            <button
+              onClick={handleRequestWithdrawal}
+              className="bg-green-600 text-white p-3 w-full rounded-md hover:bg-green-700 transition duration-200"
+            >
+              Request Withdrawal
+            </button>
           </>
         )}
-        {message && <p className="mt-5 text-center text-gray-700">{message}</p>}
+
+        {message && (
+          <div className="text-center text-red-600 mt-4">{message}</div>
+        )}
       </div>
     </div>
   );
