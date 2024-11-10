@@ -127,15 +127,13 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
             headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
         });
 
-        // Assuming response.data contains the updated like count
+        console.log("Server like response: ", response.data); // Should log 1 for like and 0 for unlike
+
         if (response.status === 200) {
-            // Update local state based on the response
-            setLiked(prevLiked => {
-                const newLikedState = !prevLiked;
-                // Update likesCount based on the newLikedState
-                setLikesCount(prevCount => newLikedState ? response.data.likesCount : Math.max(0, prevCount - 1));
-                return newLikedState;
-            });
+            setLiked((prevLiked) => !prevLiked);  // Toggle the liked state
+
+            // Update likeCount based on the new liked state without using the response
+            setLikesCount((prevLiked) => liked ? prevLiked - 1 : prevLiked + 1);
         }
     } catch (error) {
         setActionError('Error liking the post');
@@ -143,7 +141,7 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
     } finally {
         setActionLoading(false);
     }
-  }, [postID]);
+}, [postID, liked]);
 
   const handleSavePost = useCallback(async () => {
     try {

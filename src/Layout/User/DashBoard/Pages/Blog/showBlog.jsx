@@ -72,7 +72,7 @@ const ShowBlog = () => {
           </div>
           <div className="flex items-center">
             <img src="/Svg/Comment.svg" className="Avatar size-[15px]" alt="Comments" />
-            <p className="ml-2 font-medium">{blogPost.comments}</p>
+            <p className="ml-2 font-medium">{blogPost.commentsCount}</p>
           </div>
         </div>
       </div>
