@@ -24,7 +24,7 @@ const Message = () => {
   const [latestMessages, setLatestMessages] = useState({});
   const [noMessagesFound, setNoMessagesFound] = useState(false);
   // const location = useLocation(); // Retrieve location state
-  
+
   const [showGroupOptions, setShowGroupOptions] = useState(false);
   const [userStatus, setUserStatus] = useState({});
   const [selectedGroup, setSelectedGroup] = useState(null); // Active group ID
@@ -60,11 +60,11 @@ const Message = () => {
     if (userId) {
       socketRef.current.emit("join", userId);
       socketRef.current.emit("userOnline", userId); // Notify server of user online status??
-  }
-    
-  // Remove existing listener
-  socketRef.current.off("receiveGroupMessage");
-      // Listen for group messages in real time
+    }
+
+    // Remove existing listener
+    socketRef.current.off("receiveGroupMessage");
+    // Listen for group messages in real time
     socketRef.current.on("receiveGroupMessage", (data) => {
       console.log("Received group message:", data);
       if (socketRef.current && socketRef.current.adapter) {
@@ -75,59 +75,77 @@ const Message = () => {
         // Ensure message is for the selected group
         setMessages((prevMessages) => [...prevMessages, data]);
       }
-  });
-
-
-
-  socketRef.current.on("receiveMessage", async (data) => {
-    console.log("Data received:", data);
-  
-    // Check if the message is intended for the logged-in user
-    if (data.receiver !== loggedInUserId) {
-      console.log("Message received but not intended for this user:", data);
-      return; // Ignore messages not intended for this user
-    }
-  
-    // Extract the sender's ID from selectedChatId
-    const selectedSenderId = selectedChatId ? selectedChatId.split("-")[0] : null;
-  
-    // Update messages if the sender is the currently selected chat
-    if (data.sender === selectedSenderId) {
-      setMessages((prevMessages) => [...prevMessages, data]);
-    }
-  
-    console.log("Received message from:", data.sender);
-  
-    // Update latestMessages with the latest message for the contact
-    setLatestMessages((prevLatestMessages) => ({
-      ...prevLatestMessages,
-      [data.sender]: data, // Set the latest message for the sender
-    }));
-  
-    // Update contacts to move the sender to the top of the list
-    setContacts((prevContacts) => {
-      const existingContactIndex = prevContacts.findIndex(
-        (contact) => contact.id === data.sender
-      );
-  
-      if (existingContactIndex === -1) {
-        const contactData = {
-          id: data.sender,
-          fullName: data.senderName || "Unknown",
-          photo: data.senderPhoto || "default-photo-url",
-        };
-        return [contactData, ...prevContacts];
-      }
-  
-      const updatedContacts = [...prevContacts];
-      const [contact] = updatedContacts.splice(existingContactIndex, 1);
-      updatedContacts.unshift(contact);
-  
-      return updatedContacts;
     });
-  });
-  
-    
+
+    socketRef.current.on("receiveMessage", async (data) => {
+      console.log("Data received:", data);
+
+      // Ensure the message is for the logged-in user
+      if (data.receiver !== loggedInUserId) {
+        console.log("Message received but not intended for this user:", data);
+        return;
+      }
+
+      const selectedSenderId = selectedChatId
+        ? selectedChatId.split("-")[0]
+        : null;
+
+      // If the sender is the currently selected contact, add the message to the chat window
+      if (data.sender === selectedSenderId) {
+        setMessages((prevMessages) => {
+          // Check if the message already exists in the chat
+          const isMessageAlreadyExist = prevMessages.some(
+            (msg) =>
+              msg.timestamp === data.timestamp && msg.sender === data.sender
+          );
+
+          // If the message is not already in the chat, add it
+          if (!isMessageAlreadyExist) {
+            return [...prevMessages, data];
+          } else {
+            return prevMessages;
+          }
+        });
+      }
+
+      console.log("Received message from:", data.sender);
+
+      // Update the latest message for the contact
+      setLatestMessages((prevLatestMessages) => ({
+        ...prevLatestMessages,
+        [data.sender]: data,
+      }));
+
+      // Update contacts to move the sender to the top of the list or add a new contact if they are not found
+      setContacts((prevContacts) => {
+        const existingContactIndex = prevContacts.findIndex(
+          (contact) => contact.id === data.sender
+        );
+
+        if (existingContactIndex === -1) {
+          // New contact received, add to the list
+          const contactData = {
+            id: data.sender,
+            fullName: data.senderName || "Unknown",
+            photo: data.senderPhoto || "default-photo-url",
+          };
+          return [contactData, ...prevContacts];
+        } else {
+          // Existing contact, move to the top of the list
+          const updatedContacts = [...prevContacts];
+          const [contact] = updatedContacts.splice(existingContactIndex, 1);
+
+          // Update contact details in case they were missing initially
+          contact.fullName = data.senderName || contact.fullName || "Unknown";
+          contact.photo =
+            data.senderPhoto || contact.photo || "default-photo-url";
+
+          updatedContacts.unshift(contact);
+
+          return updatedContacts;
+        }
+      });
+    });
 
     // Listen for online status updates
     socketRef.current.on("userOnline", (userId) => {
@@ -141,6 +159,14 @@ const Message = () => {
       setUserStatus((prevStatus) => ({
         ...prevStatus,
         [userId]: false,
+      }));
+    });
+
+    socketRef.current.on("statusChange", (statusData) => {
+      // Example statusData structure: { userId: 'userId', status: 'online' }
+      setUserStatus((prevStatus) => ({
+        ...prevStatus,
+        [statusData.userId]: statusData.status === "online", // Set status as boolean for easier comparison
       }));
     });
 
@@ -199,6 +225,31 @@ const Message = () => {
     fetchLoggedInUser();
   }, []);
 
+  // useEffect(() => {
+  //   if (loggedInUserId) {
+  //     const fetchContacts = async () => {
+  //       try {
+  //         const response = await axios.get(
+  //           `/api/messages/messages/contacts/${loggedInUserId}`
+  //         );
+  //         setContacts(response.data);
+  //       } catch (error) {
+  //         console.error("Error fetching contacts:", error);
+  //       }
+  //     };
+  //     fetchContacts();
+  //   }
+  // }, [loggedInUserId]);
+
+  // useEffect(() => {
+  //   const fetchContacts = async () => {
+  //     // Existing code to fetch contacts or groups
+  //   };
+
+  //   fetchContacts();
+  // }, []);
+
+  // 1. Fetch contacts on page load or if logged-in user ID changes
   useEffect(() => {
     if (loggedInUserId) {
       const fetchContacts = async () => {
@@ -207,6 +258,12 @@ const Message = () => {
             `/api/messages/messages/contacts/${loggedInUserId}`
           );
           setContacts(response.data);
+
+          // Automatically select the first contact or continue with last selected contact
+          if (response.data.length > 0) {
+            const initialChatId = selectedChatId || response.data[0].id; // Use last selected or first contact
+            setSelectedChatId(initialChatId);
+          }
         } catch (error) {
           console.error("Error fetching contacts:", error);
         }
@@ -215,14 +272,56 @@ const Message = () => {
     }
   }, [loggedInUserId]);
 
-
+  // 2. Fetch messages for the selected chat when contacts load or selected chat changes
   useEffect(() => {
-    const fetchContacts = async () => {
-      // Existing code to fetch contacts or groups
-    };
+    if (selectedChatId && loggedInUserId) {
+      fetchMessagesForChat(selectedChatId, loggedInUserId);
+    }
+  }, [selectedChatId, loggedInUserId, contacts]); // Run when selectedChatId, loggedInUserId, or contacts update
 
-    fetchContacts();
-  }, []);
+  // Function to fetch messages for a specific chat
+  const fetchMessagesForChat = async (chatId, userId) => {
+    if (!chatId || !userId) {
+      console.error("fetchMessagesForChat: chatId or userId is undefined");
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `/api/messages/chat/${chatId}?userId=${userId}`
+      );
+      if (Array.isArray(response.data)) {
+        if (response.data.length === 0) {
+          console.log("No previous chat history found");
+          setMessages([]);
+          setChats((prevChats) => ({
+            ...prevChats,
+            [chatId]: [],
+          }));
+          setNoMessagesFound(true);
+        } else {
+          const lastMessage = response.data[response.data.length - 1];
+          setMessages(response.data);
+          setChats((prevChats) => ({
+            ...prevChats,
+            [chatId]: response.data,
+          }));
+          setNoMessagesFound(false);
+
+          // Update the latest message for this chat in the contact list
+          setLatestMessages((prevLatestMessages) => ({
+            ...prevLatestMessages,
+            [chatId]: lastMessage,
+          }));
+        }
+      } else {
+        console.error("Unexpected response format:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching messages for chat:", error);
+      setNoMessagesFound(true);
+    }
+  };
 
   useEffect(() => {
     // Skip fetching if user ID is not available
@@ -247,8 +346,6 @@ const Message = () => {
     // Fetch groups only if loggedInUserId has changed
     fetchGroups();
   }, [loggedInUserId]);
-
-
 
   const modifyGroup = async (groupId) => {
     try {
@@ -275,34 +372,34 @@ const Message = () => {
   };
   const handleSelectGroup = (group) => {
     const groupId = group._id;
-  
+
     // If the group is already selected, prevent refetching messages
     if (groupId === selectedGroup) {
       return; // Don't proceed if the same group is clicked
     }
-  
+
     setSelectedGroup(groupId);
     setGroupTitle(group.title);
     setSelectedGroupMembers(group.members);
     setAdmin(group.admin);
     setSelectedGroupImage(group.photo || "");
-  
+
     setSelectedMember(null);
     setSelectedChatId(groupId); // Set the group as the chat ID to listen for messages
-  
+
     setShowMessage(true);
     setMessages([]); // Clear messages when a new group is selected
-  
+
     // Remove previous listeners to prevent duplicate messages
     socketRef.current.off("receiveGroupMessage");
-  
+
     // Listen for messages in the newly joined group
     socketRef.current.on("receiveGroupMessage", (data) => {
       if (data.groupId === groupId) {
         setMessages((prevMessages) => [...prevMessages, data]);
       }
     });
-  
+
     // Fetch messages only if it's a new group (not the same one clicked again)
     if (!chats[groupId]) {
       fetchMessagesForGroup(groupId); // Fetch messages for the newly selected group
@@ -310,22 +407,25 @@ const Message = () => {
       setMessages(chats[groupId]); // Set the messages from the existing chats state if already fetched
     }
   };
-  
+
   // useEffect to handle socket events for joining and leaving groups
   useEffect(() => {
     if (selectedGroup) {
       const userId = loggedInUserId;
-  
+
       // Leave the current group when switching
       if (selectedGroup) {
-        socketRef.current.emit("leaveGroup", { groupId: selectedGroup, userId });
+        socketRef.current.emit("leaveGroup", {
+          groupId: selectedGroup,
+          userId,
+        });
       }
-  
+
       // Join the new group room
       socketRef.current.emit("joinGroup", { groupId: selectedGroup, userId });
     }
   }, [selectedGroup, loggedInUserId]);
-  
+
   // Function to fetch messages for a specific group
   const fetchMessagesForGroup = async (groupId) => {
     try {
@@ -335,7 +435,7 @@ const Message = () => {
       console.error("Error fetching group messages:", error);
     }
   };
-  
+
   // useEffect to fetch messages when the group is selected
   useEffect(() => {
     if (selectedGroup) {
@@ -347,8 +447,7 @@ const Message = () => {
       setMessages([]); // Clear messages if no group is selected
     }
   }, [selectedGroup]);
-  
-  
+
   const handleSendGroupMessage = () => {
     if (newMessage.trim()) {
       const messageToSend = {
@@ -372,12 +471,12 @@ const Message = () => {
     }
   };
 
-
-
   // Debounced search function
   const handleSearch = debounce(async () => {
     if (!searchQuery.trim()) {
-      setSearchResults([]); // Clear results if query is empty
+      if (searchResults.length > 0) {
+        setSearchResults([]); // Clear results if query is empty and results exist
+      }
       setErrorMessage("");
       return;
     }
@@ -393,10 +492,15 @@ const Message = () => {
         cancelToken: new axios.CancelToken((c) => (window.cancelRequest = c)),
       });
 
-      if (response.data.length === 0) {
-        setErrorMessage("User not found");
+      // Filter out users already in contacts from the search results
+      const filteredResults = response.data.filter(
+        (user) => !contacts.some((contact) => contact.id === user._id)
+      );
+
+      if (filteredResults.length === 0) {
+        setErrorMessage("No new users found");
       } else {
-        setSearchResults(response.data);
+        setSearchResults(filteredResults);
       }
     } catch (error) {
       console.error("Error searching for users:", error);
@@ -416,9 +520,6 @@ const Message = () => {
       if (window.cancelRequest) window.cancelRequest();
     };
   }, [searchQuery]); // Only re-run if searchQuery changes
-
-
-
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -456,8 +557,7 @@ const Message = () => {
 
   // Listen for messages from the server
   useEffect(() => {
-    const handleReceiveMessage = () => {
-    };
+    const handleReceiveMessage = () => {};
 
     // Set up the listener for incoming messages
     socketRef.current.on("receiveMessage", handleReceiveMessage);
@@ -505,65 +605,11 @@ const Message = () => {
     }
   };
 
-
-
-
-
-    const fetchMessagesForChat = async (chatId, userId) => {
-  if (!chatId || !userId) {
-    console.error("fetchMessagesForChat: chatId or userId is undefined");
-    return;
-  }
-
-  try {
-    const response = await axios.get(
-      `/api/messages/chat/${chatId}?userId=${userId}`
-    );
-    console.log("Chat ID:", chatId);
-    console.log("User ID:", userId);
-
-    // Check if the response contains an array of messages
-    if (Array.isArray(response.data)) {
-      if (response.data.length === 0) {
-        // No previous messages found, handle this case
-        console.log("No previous chat history found");
-        setMessages([]); // Clear any existing messages
-        setChats((prevChats) => ({
-          ...prevChats,
-          [chatId]: [],
-        }));
-        // Optionally, show a message to inform the user
-        setNoMessagesFound(true); // Set a state to show "No previous chat"
-      } else {
-        // Messages found, update the state with fetched messages
-        const lastMessage = response.data[response.data.length - 1]; // Get the last message
-        setMessages(response.data);
-        setChats((prevChats) => ({
-          ...prevChats,
-          [chatId]: response.data,
-        }));
-        setNoMessagesFound(false); // Reset the state for no messages
-
-        // Set the latest message for the contact
-        setLatestMessages((prevLatestMessages) => ({
-          ...prevLatestMessages,
-          [chatId]: lastMessage, // Update latest message for this chat
-        }));
-      }
-    } else {
-      console.error("Unexpected response format:", response.data);
-    }
-  } catch (error) {
-    console.error("Error fetching messages for chat:", error);
-    // Handle the error here
-    setNoMessagesFound(true); // Optionally show an error state if fetching fails
-  }
-};
-
-
   const fetchLastMessageForChat = async (chatId, userId) => {
     try {
-      const response = await axios.get(`/api/messages/chat/${chatId}/last-message?userId=${userId}`);
+      const response = await axios.get(
+        `/api/messages/chat/${chatId}/last-message?userId=${userId}`
+      );
       return response.data.message; // Return the latest message
     } catch (error) {
       console.error("Error fetching last message for chat:", error);
@@ -571,12 +617,15 @@ const Message = () => {
     }
   };
 
-   // Fetch the latest message when the component mounts or when user changes
-   useEffect(() => {
+  // Fetch the latest message when the component mounts or when user changes
+  useEffect(() => {
     const fetchMessages = async () => {
       const tempMessages = {}; // Temporary object to store the latest messages for each user
       for (let user of searchResults) {
-        const latestMessage = await fetchLastMessageForChat(user.chatId, user._id);
+        const latestMessage = await fetchLastMessageForChat(
+          user.chatId,
+          user._id
+        );
         if (latestMessage) {
           tempMessages[user._id] = latestMessage; // Store the latest message for each user
         }
@@ -585,8 +634,8 @@ const Message = () => {
     };
 
     fetchMessages(); // Call fetchMessages when the component mounts
-  }, [searchResults]); 
-  
+  }, [searchResults]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -622,7 +671,7 @@ const Message = () => {
             </div>
             {/* Create Group Button */}
             <Link to="/create-group">
-              <div className="OrangeButtonWithText-v3 fixed bottom-10 right-10 sm:relative flex items-center cursor-pointer justify-center">
+              <div className="OrangeButtonWithText-v3 fixed bottom-1 right-1 sm:relative flex items-center cursor-pointer justify-center">
                 <p className="text-2xl">+</p>
               </div>
             </Link>
@@ -653,28 +702,27 @@ const Message = () => {
               )}
             </div>
           )}
-        <div className="ml-10 mr-2 mt-5">
-  <p className="poppins-semibold text-[15px]">Chats</p>
-  {contacts && contacts.length > 0 ? (
-    contacts.map((contact, index) => (
-      <div
-        key={contact._id || index} // Fallback to index if _id is missing
-        onClick={() => handleSelectMember(contact)}
-        className="cursor-pointer"
-      >
-        <InfluncerMessage
-          Image={contact.photo || "default-photo-url"} // Default image if missing
-          Name={contact.fullName || "Unknown"}
-          Time={userStatus[contact._id] ? "Online" : "Offline"}
-          Message={latestMessages[contact.id]?.text}
-        />
-      </div>
-    ))
-  ) : (
-    <p>No members found</p>
-  )}
-</div>
-
+          <div className="ml-10 mr-2 mt-5 relative right-8">
+            <p className="poppins-semibold text-[15px]">Chats</p>
+            {contacts && contacts.length > 0 ? (
+              contacts.map((contact, index) => (
+                <div
+                  key={contact._id || index} // Fallback to index if _id is missing
+                  onClick={() => handleSelectMember(contact)}
+                  className="cursor-pointer"
+                >
+                  <InfluncerMessage
+                    Image={contact.photo || "default-photo-url"} // Default image if missing
+                    Name={contact.fullName || "Unknown"}
+                    Time={userStatus[contact._id] ? "Online" : "Offline"}
+                    Message={latestMessages[contact.id]?.text}
+                  />
+                </div>
+              ))
+            ) : (
+              <p>No members found</p>
+            )}
+          </div>
           ;
           {showGroupOptions && selectedGroup && (
             <div className="popup-overlay">
@@ -686,7 +734,7 @@ const Message = () => {
             </div>
           )}
           {/* Groups Section */}
-          <div className="mt-5 ml-10 mr-2">
+          <div className="mt-5 ml-10 mr-2 relative right-8">
             <p className="poppins-semibold text-[15px]">Groups</p>
             {groups && groups.length > 0 ? (
               groups.map((group) => (

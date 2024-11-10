@@ -39,51 +39,75 @@ const CreateGroupPage = () => {
     };
     fetchLoggedInUser();
   }, []);
-
   const handleSearch = debounce(async () => {
+    // If search query is empty, reset the search results
     if (!searchQuery.trim()) {
-      resetSearch();
+      resetSearch();  // Reset search results
       return;
     }
-
+  
     setIsSearching(true);
-    resetSearch();
-
+    resetSearch();  // Reset results on each new search
+  
     try {
+      // Cancel previous request if there's one ongoing
+      if (window.cancelRequest) {
+        window.cancelRequest();
+      }
+  
+      // Create a new cancel token for the current request
+      const cancelTokenSource = axios.CancelToken.source();
+      window.cancelRequest = cancelTokenSource.cancel;
+  
+      // Fetch search results based on the search query
       const response = await axios.get(`/api/users/search`, {
         params: { query: searchQuery },
-        cancelToken: new axios.CancelToken((c) => (window.cancelRequest = c)),
+        cancelToken: cancelTokenSource.token,
       });
-
-      // Exclude the logged-in user and already added members from results
+  
+      // Filter out the logged-in user and already added members from results
       const results = response.data.filter(
-        user => user._id !== loggedInUserId && !members.some(member => member._id === user._id)
+        (user) => user._id !== loggedInUserId && !members.some((member) => member._id === user._id)
       );
-
+  
       if (results.length === 0) {
         setErrorMessage("User not found");
       } else {
         setSearchResults(results);
       }
     } catch (error) {
-      console.error("Error searching for users:", error);
-      setErrorMessage("Error fetching search results.");
+      if (axios.isCancel(error)) {
+        console.log("Request canceled:", error.message);
+      } else {
+        console.error("Error searching for users:", error);
+        setErrorMessage("Error fetching search results.");
+      }
     } finally {
       setIsSearching(false);
     }
   }, 500);
-
+  
   const resetSearch = () => {
-    setSearchResults([]);
-    setErrorMessage('');
+    setSearchResults([]);  // Clear search results
+    setErrorMessage('');  // Clear any error messages
   };
-
+  
+  // Reset the search results when the query or members change
   useEffect(() => {
-    handleSearch();
+    if (searchQuery.trim()) {
+      handleSearch();
+    } else {
+      resetSearch();
+    }
+  
+    // Cleanup the cancel token when component unmounts or on searchQuery change
     return () => {
-      if (window.cancelRequest) window.cancelRequest();
+      if (window.cancelRequest) {
+        window.cancelRequest();
+      }
     };
-  }, [searchQuery, members]); // Added 'members' dependency to re-trigger search after adding a member
+  }, [searchQuery, members]);  // Trigger search when searchQuery or members change
+  
 
   const addMember = (member) => {
     if (members.length < 3 && !members.some((m) => m._id === member._id)) {
@@ -171,106 +195,104 @@ const CreateGroupPage = () => {
   };
   
   return (
-    <div className="flex items-top justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-80 md:w-96">
-        <h2 className="text-lg font-semibold mb-4">Create Group</h2>
+    <div className="flex items-top justify-center min-h-screen bg-orange-50"> {/* Orange background for the outer container */}
+  <div className="bg-white p-6 rounded-lg shadow-lg w-80 md:w-96">
+    <h2 className="text-lg font-semibold mb-4 text-orange-600">Create Group</h2> {/* Title with orange color */}
 
-      {/* Group Photo Input */}
-<div
-  onDrop={handlePhotoDrop}
-  onDragOver={(e) => e.preventDefault()}
-  className="flex items-center justify-center bg-gray-200 rounded-full w-24 h-24 mx-auto mb-4 relative"
->
-  {groupPhotoPreview ? (
-    <img src={groupPhotoPreview} alt="Group Preview" className="rounded-full w-full h-full object-cover" />
-  ) : (
-    <span className="text-gray-500">Drag & Drop</span>
-  )}
-</div>
-
-{/* Error Message for Group Photo */}
-{errorMessage && <p className="text-red-500 items-center  text-sm justify-center">{errorMessage}</p>}
-
-
-        {/* Group Title Input */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Group Title</label>
-          <input
-            type="text"
-            className="mt-1 px-3 py-2 border border-gray-300 rounded-md w-full"
-            placeholder="Enter Group Title"
-            value={groupTitle}
-            onChange={(e) => setGroupTitle(e.target.value)}
-          />
-          {titleError && <p className="text-red-500 text-sm">{titleError}</p>}
-        </div>
-   {/* Member Search with Icon */}
-   <div className="relative mb-4">
-          <div className="relative flex items-center">
-            <FiSearch className="absolute left-3 text-gray-500" />
-            <input
-              type="text"
-              className="pl-10 mt-1 px-3 py-2 border border-gray-300 rounded-md w-full"
-              placeholder="Search by Name"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          {isSearching && <p>Loading...</p>}
-          {/* {errorMessage && <p className="text-red-500">{errorMessage}</p>} */}
-          {searchResults.length > 0 && (
-            <div className="absolute mt-2 w-full bg-white border border-gray-300 rounded-md z-10">
-              {searchResults.map((user) => (
-                <div
-                  key={user._id}
-                  className="flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => addMember(user)}
-                >
-                  <span>{user.fullName}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-     {/* Selected Members Display */}
-<div className="flex flex-wrap gap-2 mb-4">
-  {members.map((member) => (
-    <motion.div
-      key={member._id}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      className="flex items-center bg-gray-200 p-1 rounded-lg shadow-md max-h-8"
+    {/* Group Photo Input */}
+    <div
+      onDrop={handlePhotoDrop}
+      onDragOver={(e) => e.preventDefault()}
+      className="flex items-center justify-center bg-gray-200 rounded-full w-24 h-24 mx-auto mb-4 relative"
     >
-      {/* Updated span with smaller font size and lighter weight */}
-      <span className="mr-2 text-xs font-light">{member.fullName}</span>
-      
-      {/* Remove button with smaller padding */}
-      <button
-        className="text-red-500 hover:bg-red-200 rounded-full p-1"
-        onClick={() => removeMember(member._id)}
-      >
-        &times;
-      </button>
-    </motion.div>
-  ))}
-</div>
-
-        {memberError && <p className="text-red-500 text-sm mb-4">{memberError}</p>}
-
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-2">
-          <button className="px-4 py-2 rounded-md border border-gray-300" onClick={() => window.history.back()}>
-            Cancel
-          </button>
-          <button className="px-4 py-2 rounded-md bg-green-500 text-white" onClick={handleCreateGroup}>
-            Create
-          </button>
-        </div>
-      </div>
+      {groupPhotoPreview ? (
+        <img src={groupPhotoPreview} alt="Group Preview" className="rounded-full w-full h-full object-cover" />
+      ) : (
+        <span className="text-gray-500">Drag & Drop</span>
+      )}
     </div>
-  );
+
+    {/* Error Message for Group Photo */}
+    {/* {errorMessage && <p className="text-red-500 items-center text-sm justify-center">{errorMessage}</p>} */}
+
+    {/* Group Title Input */}
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-gray-700">Group Title</label>
+      <input
+        type="text"
+        className="mt-1 px-3 py-2 border border-gray-300 rounded-md w-full"
+        placeholder="Enter Group Title"
+        value={groupTitle}
+        onChange={(e) => setGroupTitle(e.target.value)}
+      />
+      {titleError && <p className="text-red-500 text-sm">{titleError}</p>}
+    </div>
+
+    {/* Member Search with Icon */}
+    <div className="relative mb-4">
+      <div className="relative flex items-center">
+        <FiSearch className="absolute left-3 text-gray-500" />
+        <input
+          type="text"
+          className="pl-10 mt-1 px-3 py-2 border border-gray-300 rounded-md w-full"
+          placeholder="Search by Name"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+      {isSearching && <p>Loading...</p>}
+        {/* Show error message if no results are found */}
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+      {searchResults.length > 0 && (
+        <div className="absolute mt-2 w-full bg-white border border-gray-300 rounded-md z-10">
+          {searchResults.map((user) => (
+            <div
+              key={user._id}
+              className="flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer"
+              onClick={() => addMember(user)}
+            >
+              <span>{user.fullName}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+
+    {/* Selected Members Display */}
+    <div className="flex flex-wrap gap-2 mb-4">
+      {members.map((member) => (
+        <motion.div
+          key={member._id}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="flex items-center bg-orange-100 p-1 rounded-lg shadow-md max-h-8"
+        >
+          <span className="mr-2 text-xs font-light">{member.fullName}</span>
+          <button
+            className="text-red-500 hover:bg-red-200 rounded-full p-1"
+            onClick={() => removeMember(member._id)}
+          >
+            &times;
+          </button>
+        </motion.div>
+      ))}
+    </div>
+
+    {memberError && <p className="text-red-500 text-sm mb-4">{memberError}</p>}
+
+    {/* Action Buttons */}
+    <div className="flex justify-end space-x-2">
+      <button className="px-4 py-2 rounded-md border border-gray-300 text-orange-500 hover:bg-orange-200" onClick={() => window.history.back()}>
+        Cancel
+      </button>
+      <button className="px-4 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600" onClick={handleCreateGroup}>
+        Create
+      </button>
+    </div>
+  </div>
+</div>
+  )
 };
 
 export default CreateGroupPage;

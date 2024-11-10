@@ -25,7 +25,11 @@ const InfluncerMessage = ({ Image, Name, Time, Message, Unread, onClick }) => {
             {Time}
           </p>
         </div>
-        <p className="text-black/70 text-[10px]">{Message}</p>
+        <p className="text-green-900/80 font-bold text-[11px] max-w-[8rem] truncate">
+  {Message}
+</p>
+
+
         {Unread > 0 && (
           <p className="text-red-500 text-[10px]">{Unread} unread messages</p>
         )}
