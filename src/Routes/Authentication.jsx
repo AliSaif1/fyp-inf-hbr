@@ -76,9 +76,11 @@ function Authentication() {
         if (profileCookie === '0') {
           navigate(`/SignUp/${userCookie}`); // Ensure `routes` is defined
         } else {
-          if (userCookie.includes('B')) {
+          if (userCookie.includes('b')) {
             setComponent(<BrandRoutes />);
-          } else if (userCookie.includes('i')) {
+          } else if (userCookie.includes('B')) {
+            setComponent(<BrandRoutes />);
+          }else if (userCookie.includes('i')) {
             setComponent(<InfluencerRoutes />);
           } else if (userCookie.includes('U')) {
             setComponent(<UserRoutes />);
