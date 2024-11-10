@@ -80,7 +80,7 @@ const ShowComments = ({ postID, show, onClose }) => {
         }
       );
       setNewComment(''); // Clear input field
-      setComments([]); // Reset comments to fetch fresh data
+      // setComments([]); // Reset comments to fetch fresh data
       setPage(1); // Reset page to 1 to fetch the first page
       fetchComments(1); // Fetch comments again
     } catch (err) {
