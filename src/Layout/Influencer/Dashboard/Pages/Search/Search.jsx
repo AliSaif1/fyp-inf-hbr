@@ -10,6 +10,7 @@ const Search = () => {
   const [message, setMessage] = useState('');
   const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState('');
+  const [accountID, setAccountID] = useState("");
 
   // Fetch payment accounts and earnings on component mount
   useEffect(() => {
@@ -24,6 +25,8 @@ const Search = () => {
         });
         if (accountsResponse.ok) {
           const accountsData = await accountsResponse.json();
+          console.log("Accounts: ", accountsData.accounts);
+          setAccountID(accountsData.accounts._id);
           setAccounts(accountsData.accounts);
         } else {
           setMessage('Failed to fetch payment accounts. Please try again.');
@@ -47,70 +50,81 @@ const Search = () => {
 
     fetchData();
   }, []);
+
   const handleAddPaymentAccount = async () => {
     // Check if all fields are filled first
     if (!paymentAccount || !accountHolderName || !bankName) {
-      setMessage('Please fill in all fields to add the payment account.');
-      return;
+        setMessage('Please fill in all fields to add the payment account.');
+        return;
     }
-  
+
     // Validate Account Holder Name (should only contain letters and spaces)
-    const nameRegex = /^[A-Za-z\s]+$/; 
+    const nameRegex = /^[A-Za-z\s]+$/;
     if (!nameRegex.test(accountHolderName)) {
-      setMessage('Account holder name should only contain letters and spaces.');
-      return;
+        setMessage('Account holder name should only contain letters and spaces.');
+        return;
     }
-  
+
     // Validate Account Holder Name length (at least 8 characters)
     if (accountHolderName.length < 8) {
-      setMessage('Account holder name must be at least 8 characters long.');
-      return;
+        setMessage('Account holder name must be at least 8 characters long.');
+        return;
     }
-  
+
     // Validate Bank Name (ensure a bank is selected)
     if (!bankName) {
-      setMessage('Please select a bank.');
-      return;
+        setMessage('Please select a bank.');
+        return;
     }
-  
+
     // Validate Payment Account Number (must be exactly 16 digits and contain only numbers)
     const accountNumberRegex = /^\d{16}$/;
     if (!accountNumberRegex.test(paymentAccount)) {
-      setMessage('Payment account number must be exactly 16 digits with no letters.');
-      return;
-    }
-  
-    const newAccount = { paymentAccount, accountHolderName, bankName };
-  
-    try {
-      const authToken = localStorage.getItem('authToken');
-      if (!authToken) {
-        setMessage('Authentication token is missing. Please log in.');
+        setMessage('Payment account number must be exactly 16 digits with no letters.');
         return;
-      }
-  
-      const response = await fetch('/api/addPaymentAccount', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-        },
-        body: JSON.stringify(newAccount),
-      });
-  
-      if (response.ok) {
-        setAccounts((prevAccounts) => [...prevAccounts, newAccount]);
-        setMessage(`Payment account ${paymentAccount} added successfully.`);
-        setPaymentAccount('');
-        setAccountHolderName('');
-        setBankName('');
-      } else {
-        setMessage('Failed to add payment account. Please try again.');
-      }
-    } catch (error) {
-      setMessage('An error occurred while adding the payment account.');
     }
-  };
+
+    const newAccount = { paymentAccount, accountHolderName, bankName };
+
+    try {
+        const authToken = localStorage.getItem('authToken');
+        if (!authToken) {
+            setMessage('Authentication token is missing. Please log in.');
+            return;
+        }
+
+        const response = await fetch('/api/addPaymentAccount', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+            },
+            body: JSON.stringify(newAccount),
+        });
+
+        if (response.status === 201) {
+            const result = await response.json();
+            console.log("Account: added :", result.newPaymentAccount);
+            console.log("Account ID: ", result.newPaymentAccount._id);
+            
+            setAccounts((prevAccounts) => [...prevAccounts, result.newPaymentAccount]); // use the data from the response
+            setMessage(`Payment account ${paymentAccount} added successfully.`);
+            
+            // Reset the form fields
+            setPaymentAccount('');
+            setAccountHolderName('');
+            setBankName('');
+            setAccountID(result.newPaymentAccount._id);
+        } else {
+            const errorData = await response.json();
+            setMessage(errorData.message || 'Failed to add payment account. Please try again.');
+        }
+    } catch (error) {
+        console.error(error);
+        setMessage('An error occurred while adding the payment account.');
+    }
+};
+
   const handleRequestWithdrawal = () => {
     if (withdrawalAmount && selectedAccount) {
       const amount = parseFloat(withdrawalAmount);
@@ -129,7 +143,7 @@ const Search = () => {
   
       // Prepare the request data
       const requestData = {
-        accountID: selectedAccount, // Use the selected account's _id
+        accountID: accountID, // Use the selected account's _id
         amount: amount,
       };
   
