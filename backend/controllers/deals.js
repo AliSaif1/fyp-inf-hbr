@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import Contract from '../models/contractModel.js'; // Adjust the import path according to your project structure
 import Proposal from '../models/proposal.js'; // Import Proposal model
 import User from '../models/user.js';
+import mongoose from 'mongoose';
 
 export const getDeals = async (req, res) => {
   try {
@@ -288,6 +289,9 @@ export const getContractDetails = async (req, res) => {
 };
 
 export const acceptContract = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     // Extract the influencerID from the Authorization header
     const authHeader = req.headers.authorization;
@@ -312,22 +316,26 @@ export const acceptContract = async (req, res) => {
     const { contractID } = req.params;
 
     // Find the contract by ID
-    const contract = await Contract.findById(contractID);
+    const contract = await Contract.findById(contractID).session(session);
     if (!contract) {
       console.error('Contract not found for ID:', contractID);
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ message: 'Contract not found' });
     }
 
     // Check if there are milestones in the contract
     if (contract.milestones.length === 0) {
       console.error('No milestones found for contract:', contractID);
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ message: 'No milestones found for this contract' });
     }
 
     // Get the last milestone
     const lastMilestone = contract.milestones[contract.milestones.length - 1];
 
-    // Update the status of the last milestone to "Accepted"
+    // Update the status of the last milestone to "Payment Pending"
     lastMilestone.status = 'Payment Pending';
 
     // Create a new proposal from the milestone data
@@ -337,41 +345,53 @@ export const acceptContract = async (req, res) => {
       posts: lastMilestone.posts,
       deadline: lastMilestone.deadline,
       revisions: lastMilestone.revisions,
-      // other fields can be left empty or defaulted
     });
 
     // Save the new proposal to the database
-    const savedProposal = await newProposal.save();
+    const savedProposal = await newProposal.save({ session });
 
     // Update the contract to include the new proposal ID
     contract.proposalID = savedProposal._id; // Update the contract with the proposal ID
-    await contract.save();
+    await contract.save({ session });
 
     // Now update the deal document
     const dealID = contract.dealID; // Assuming dealID is part of the contract
-    const deal = await Deal.findById(dealID); // Find the deal by ID
+    const deal = await Deal.findById(dealID).session(session); // Find the deal by ID
 
     if (!deal) {
       console.error('Deal not found for ID:', dealID);
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ message: 'Deal not found' });
     }
 
-    // Update the userStatuses array to set the status to "Approved" for the influencer
-    const userStatusIndex = deal.userStatuses.findIndex(status => status.userID.toString() === influencerID);
-    
+   // Find the index of the userStatuses entry where the userID matches the influencerID and status is "Invited"
+    const userStatusIndex = deal.userStatuses.findIndex(
+      status => status.userID.toString() === influencerID && status.status === 'Invited'
+    );
+
     if (userStatusIndex !== -1) {
-      deal.userStatuses[userStatusIndex].status = 'Approved'; // Update the status to Approved
+      // Update only the "Invited" status to "Approved"
+      deal.userStatuses[userStatusIndex].status = 'Approved';
       deal.userStatuses[userStatusIndex].proposalID = savedProposal._id; // Save the proposal ID
     } else {
-      console.error('Influencer not found in userStatuses for influencerID:', influencerID);
-      return res.status(404).json({ message: 'Influencer not found in userStatuses' });
+      console.error('Invited status not found for influencerID:', influencerID);
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: 'Invited status not found for influencer in userStatuses' });
     }
 
     // Save the updated deal
-    await deal.save();
+    await deal.save({ session });
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(200).json({ message: 'Contract accepted, deal updated, and proposal created successfully', contract, proposal: savedProposal });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error('Error accepting contract:', error);
     return res.status(500).json({ message: 'Server error' });
   }
