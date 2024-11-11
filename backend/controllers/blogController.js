@@ -435,7 +435,8 @@ export const getSavedPosts = async (req, res) => {
         };
 
         // Calculate the number of comments
-        const commentsCount = Object.keys(interactions.commentedBy).length;
+        const commentsCount = Object.values(interactions.commentedBy)
+        .reduce((total, commentsArray) => total + commentsArray.length, 0);
 
         return {
           _id: post._id,
