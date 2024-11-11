@@ -12,8 +12,8 @@ const monthlyInteractionSchema = new mongoose.Schema({
     of: [commentSchema],
     default: {}
   },
-  shares: { type: Number, default: 0 },
-  visits: { type: Number, default: 0 }
+  reach: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  visits: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 }, { _id: false });
 
 const blogPostSchema = new mongoose.Schema({
