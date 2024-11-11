@@ -161,6 +161,7 @@ const NavBarItems = ({ items,  setSelectedFilter }) => {
 const Modal = ({ isOpen, onClose, contractDetails, deal, isRequested , onSuccess}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const receivingAmount = contractDetails.contractBudget * 0.9;
 
   if (!isOpen) return null; // If the modal is not open, return null
 
@@ -217,7 +218,8 @@ const Modal = ({ isOpen, onClose, contractDetails, deal, isRequested , onSuccess
       <div className="bg-white rounded-lg p-5 w-11/12 max-w-lg">
         <h2 className="text-lg font-bold mb-4">{deal.brandName}</h2>
         <p>{deal.campaignDes}</p>
-        <p className="mt-2">You will receive: ${contractDetails.contractBudget}</p>
+        <p className="mt-2">Contract Budget: ${contractDetails.contractBudget}</p>
+        <p className="mt-2">You will receive: ${receivingAmount}</p>
         <p className="mt-2">Contract Status: {contractDetails.status}</p>
         <p className="mt-2">Category: {deal.category}</p>
 

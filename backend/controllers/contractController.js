@@ -649,6 +649,7 @@ export const sendPosts = async (req, res) => {
     res.status(500).json({ message: error.message || 'Server error, unable to fetch media posts.' });
   }
 };
+
 export const approveContract = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -689,13 +690,9 @@ export const approveContract = async (req, res) => {
       return res.status(404).json({ message: 'User not found for the given influencer ID.' });
     }
 
-    // Step 6: Update the user's earnings
-    const budgetToAdd = lastMilestone.budget;
-    if (user.earnings) {
-      user.earnings += budgetToAdd; // Add to existing earnings
-    } else {
-      user.earnings = budgetToAdd; // Initialize earnings
-    }
+    // Step 6: Update the user's earnings after deducting 10% platform fee
+    const budgetToAdd = lastMilestone.budget * 0.9; // 90% of the last milestone budget
+    user.earnings = (user.earnings || 0) + budgetToAdd;
 
     // Step 7: Save both the contract and user inside the transaction
     await contract.save({ session });
@@ -717,6 +714,7 @@ export const approveContract = async (req, res) => {
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 export const approveCancelRequest = async (req, res) => {
   try {
     const { contractID } = req.params;

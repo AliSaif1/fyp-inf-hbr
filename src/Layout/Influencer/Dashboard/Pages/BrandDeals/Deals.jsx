@@ -16,7 +16,7 @@ const Deals = () => {
   const [verificationMessage, setVerificationMessage] = useState(''); // State for verification message
 
   const navItems = ['Category', 'Watches', 'Crypto', 'Clothing'];
-  const budget = ['budget', '0-10$', '10-50$', '50-100$', '100$ +'];
+  const budget = ['budget', '0-100$', '100-500$', '500-1000$', '1000$ +'];
 
   const fetchDeals = () => {
     setLoading(true);
@@ -69,10 +69,10 @@ const Deals = () => {
 
       if (selectedbudget !== 'budget') {
         const budgetRanges = {
-          '0-10$': [0, 10],
-          '10-50$': [10, 50],
-          '50-100$': [50, 100],
-          '100$ +': [100, Infinity]
+          '0-100$': [0, 100],
+          '100-500$': [100, 500],
+          '500-1000$': [500, 1000],
+          '1000$ +': [1000, Infinity]
         };
         const [minbudget, maxbudget] = budgetRanges[selectedbudget] || [0, Infinity];
 
