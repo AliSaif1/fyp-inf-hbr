@@ -104,7 +104,7 @@ const Engagement = ( { curSixMonLikes, curSixMonShares, curSixMonComments, prevS
             <div className="mt-2 grid xs:grid-cols-2 xs:grid-rows-1  md:grid-cols-3 md:grid-rows-1 gap-y-5">
               <Card Heading="Total Likes" totalNumbers={curSixMonLikes} Percentage={likesChange} time="Last 6 Months" Status={getStatus(likesChange)} />
               <Card Heading="Total Comments" totalNumbers={curSixMonComments} Percentage={CommentsChange} time="Last 6 Months" Status={getStatus(CommentsChange)} />
-              <Card Heading="Total Shares" totalNumbers={curSixMonShares} Percentage={sharesChange} time="Last 6 Months" Status={getStatus(sharesChange)} />
+              <Card Heading="Total Reach" totalNumbers={curSixMonShares} Percentage={sharesChange} time="Last 6 Months" Status={getStatus(sharesChange)} />
             </div>
             <p className="lato-regular mt-12 ml-7">Total Likes and Comments</p>
             {/* 2px border and Bar chart */}

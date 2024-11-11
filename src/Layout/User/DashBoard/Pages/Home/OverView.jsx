@@ -1,5 +1,5 @@
 import './Index.css';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import ShowComments from './showComments';
 import { useNavigate } from 'react-router-dom';
@@ -177,8 +177,123 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
     });
   };
 
+  const postRef = useRef(null);
+
+  const monitorReachCount = async () => {
+    try {
+      // Check if postTime is a valid string
+      if (!postTime || typeof postTime !== 'string') {
+        console.error("Invalid postTime:", postTime);
+        return; // Exit early if postTime is not valid
+      }
+  
+      // Manually extract the date part (MM/DD/YYYY) from postTime
+      const [datePart] = postTime.split(','); // "MM/DD/YYYY"
+      if (!datePart) {
+        console.error("Date part extraction failed:", postTime);
+        return; // Exit early if date extraction fails
+      }
+  
+      const [month, day, year] = datePart.split('/'); // Extract month, day, year
+  
+      // Check if the extracted values are valid
+      if (!month || !day || !year) {
+        console.error("Invalid date format:", datePart);
+        return; // Exit early if the date format is invalid
+      }
+  
+      // Construct a valid date string in 'YYYY-MM-DD' format to ensure correct Date parsing
+      const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  
+      // Convert the formattedDate string to a Date object
+      const date = new Date(formattedDate);
+  
+      // Extract the year and month (formatted as 'YYYY-MM')
+      const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  
+      // Send blogId and yearMonth in the request
+      await axios.put('/influencer/addReachCount', 
+        { blogId: postID, month: yearMonth }, // Payload with blogId and month
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`
+          }
+        }
+      );
+      console.log("Reach count updated successfully");
+    } catch (error) {
+      console.error("Error updating reach count:", error);
+    }
+  };
+
+  const handleScroll = () => {
+    if (postRef.current) {
+      const rect = postRef.current.getBoundingClientRect();
+      const isFullyInView = rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+      if (isFullyInView) {
+        monitorReachCount();
+        // Remove the scroll listener after reaching once
+        window.removeEventListener('scroll', handleScroll);
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const monitorVisitCount = async () => {
+    try {
+      // Check if postTime is a valid string
+      if (!postTime || typeof postTime !== 'string') {
+        console.error("Invalid postTime:", postTime);
+        return; // Exit early if postTime is not valid
+      }
+  
+      // Manually extract the date part (MM/DD/YYYY) from postTime
+      const [datePart] = postTime.split(','); // "MM/DD/YYYY"
+      if (!datePart) {
+        console.error("Date part extraction failed:", postTime);
+        return; // Exit early if date extraction fails
+      }
+  
+      const [month, day, year] = datePart.split('/'); // Extract month, day, year
+  
+      // Check if the extracted values are valid
+      if (!month || !day || !year) {
+        console.error("Invalid date format:", datePart);
+        return; // Exit early if the date format is invalid
+      }
+  
+      // Construct a valid date string in 'YYYY-MM-DD' format to ensure correct Date parsing
+      const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  
+      // Convert the formattedDate string to a Date object
+      const date = new Date(formattedDate);
+  
+      // Extract the year and month (formatted as 'YYYY-MM')
+      const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  
+      // Send blogId and yearMonth in the request
+      await axios.put('/influencer/minitorVisitCount', 
+        { blogId: postID, month: yearMonth }, // Payload with blogId and month
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`
+          }
+        }
+      );
+      console.log("Reach count updated successfully");
+    } catch (error) {
+      console.error("Error updating reach count:", error);
+    }
+  };
+
   return (
-    <div className="p-4 border border-gray-200 rounded-lg mt-4 text-[9px] xs:text-[10px] sm:text-[13px] md:text-[12px]">
+    <div ref={postRef} className="p-4 border border-gray-200 rounded-lg mt-4 text-[9px] xs:text-[10px] sm:text-[13px] md:text-[12px]"
+    onClick={monitorVisitCount}>
       <div className="flex items-center justify-between space-x-4 mb-2">
         <div className="flex items-center space-x-2">
           <div className="flex size-[60px] xs:size-[80px] sm:size-[100px] md:size-[60px] items-center border-2 p-[1px] rounded-full">

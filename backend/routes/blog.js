@@ -9,7 +9,9 @@ import {
     getComments,
     addComment,
     updateBlog,
-    deleteBlog } from '../controllers/blogController.js';
+    deleteBlog, 
+    monitorReachCount,
+    minitorVisitCount} from '../controllers/blogController.js';
 import multer from 'multer';
 
 const router = express.Router();
@@ -26,5 +28,7 @@ router.get('/savedBlogs', getSavedPosts);
 router.get('/getComments/:postId', getComments);
 router.post('/addComment/:postId', addComment);
 router.delete('/deletePost/:postId', deleteBlog);
+router.put('/addReachCount', monitorReachCount);
+router.put('/minitorVisitCount', minitorVisitCount);
 
 export default router;

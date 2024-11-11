@@ -79,7 +79,7 @@ const EngagementGrowth = ({ blogs }) => {
               </div>
               <div className="flex items-center gap-x-2">
                 <div className="size-[10px] bg-orange-500 rounded-full"></div>
-                <p>Reach</p>
+                <p>Visits</p>
               </div>
             </div>
           </div>

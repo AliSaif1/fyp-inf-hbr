@@ -90,8 +90,8 @@ const OverView = () => {
                 // Get data for the last 6 months
                 if (month >= sixMonthsAgoStr && month <= currentMonth) {
                   allTimeTotals.curSixMonLikes += interactions.likes || 0;
-                  allTimeTotals.curSixMonShares += interactions.shares || 0;
-                  allTimeTotals.curSixMonVisits += interactions.visits || 0;
+                  allTimeTotals.curSixMonShares += interactions.reach.length || 0;
+                  allTimeTotals.curSixMonVisits += interactions.visits.length || 0;
                   if (interactions.commentedBy) {
                     Object.keys(interactions.commentedBy).forEach(user => {
                       allTimeTotals.curSixMonComments += interactions.commentedBy[user].length || 0;
@@ -102,8 +102,8 @@ const OverView = () => {
                 // 6th - 12th months data
                 if (month >= twelveMonthsAgoStr && month < sixMonthsAgoStr) {
                   allTimeTotals.prevSixMonLikes += interactions.likes || 0;
-                  allTimeTotals.prevSixMonShares += interactions.shares || 0;
-                  allTimeTotals.prevSixMonVisits += interactions.visits || 0;
+                  allTimeTotals.prevSixMonShares += interactions.reach.length  || 0;
+                  allTimeTotals.prevSixMonVisits += interactions.visits.length  || 0;
                   if (interactions.commentedBy) {
                     Object.keys(interactions.commentedBy).forEach(user => {
                       allTimeTotals.prevSixMonComments += interactions.commentedBy[user].length || 0;
@@ -114,8 +114,8 @@ const OverView = () => {
                 // Current month data
                 if (month === currentMonth) {
                   currentMonthBlogs.likes += interactions.likes || 0;
-                  currentMonthBlogs.shares += interactions.shares || 0;
-                  currentMonthBlogs.visits += interactions.visits || 0;
+                  currentMonthBlogs.shares += interactions.reach.length || 0;
+                  currentMonthBlogs.visits += interactions.visits.length || 0;
                   if (interactions.commentedBy) {
                     Object.keys(interactions.commentedBy).forEach(user => {
                       currentMonthBlogs.comments += interactions.commentedBy[user].length || 0;
@@ -126,8 +126,8 @@ const OverView = () => {
                 // previous month data
                 if (month === previousMonthStr) {
                   previousMonthBlogs.likes += interactions.likes || 0;
-                  previousMonthBlogs.shares += interactions.shares || 0;
-                  previousMonthBlogs.visits += interactions.visits || 0;
+                  previousMonthBlogs.shares += interactions.reach.length || 0;
+                  previousMonthBlogs.visits += interactions.visits.length || 0;
                   if (interactions.commentedBy) {
                     Object.keys(interactions.commentedBy).forEach(user => {
                       previousMonthBlogs.comments += interactions.commentedBy[user].length || 0;
@@ -149,11 +149,11 @@ const OverView = () => {
           const currentVisits = currentMonthBlogs.visits;
 
           // Processing for Egagement Rate calculations
-          let totalEngagements = currentShares + currentLikes + currentComments;
-          const currentEngagementRate = currentVisits > 0 ? (totalEngagements / currentVisits) : 0;
+          let totalEngagements =  currentLikes + currentComments;
+          const currentEngagementRate = currentShares > 0 ? (totalEngagements / currentShares) : 0;
 
-          totalEngagements = prevShares + prevComments + prevLikes;
-          const prevEngagementRate = prevVisits > 0 ? (totalEngagements / prevVisits) : 0;
+          totalEngagements = prevComments + prevLikes;
+          const prevEngagementRate = prevShares > 0 ? (totalEngagements / prevShares) : 0;
 
           // Percentage changes compared to previous month
           const sharesChange = calculateChange(prevShares, currentShares);
@@ -303,7 +303,7 @@ const OverViewLayout = ({ shares, likes, comments, engagement_Rate, reach, total
         <div className="mt-6">
           <div className="mt-2 grid xs:grid-cols-2 xs:grid-rows-3 gap-y-5 md:grid-cols-3 md:grid-rows-2 gap-y-5">
             <Card
-              Heading="Shares"
+              Heading="Reach"
               totalNumbers={shares}
               Percentage={sharesPercent}
               time="LastMonth"
@@ -324,14 +324,14 @@ const OverViewLayout = ({ shares, likes, comments, engagement_Rate, reach, total
               Status={getStatus(commentsPercent)}
             />
             <CardWithImage
-              Heading="Reach"
+              Heading="visits"
               totalNumbers={reach}
               Percentage={visistsChange}
               time="LastMonth"
               ImageSource="card1.png"
             />
             <Card
-              Heading="Egagement Rate"
+              Heading="Engagement Rate"
               totalNumbers={engagement_Rate}
               Percentage={engagementChange}
               time="LastMonth"

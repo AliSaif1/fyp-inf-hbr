@@ -66,8 +66,8 @@ export const createBlog = async (req, res) => {
         [month]: {
           likes: 0, // Default values
           commentedBy: {}, // Default empty object for comments
-          shares: 0,
-          visits: 0
+          shares: [],
+          visits: []
         }
       }
     };
@@ -446,7 +446,7 @@ export const getSavedPosts = async (req, res) => {
           blogMainImg: post.blogMainImg,
           likes: interactions.likes,
           commentsCount,
-          shares: interactions.shares,
+          shares: interactions.reach.length,
           author: {
             fullName: author?.fullName || 'Unknown',
             photo: author?.photo || 'default.jpg'
@@ -772,5 +772,123 @@ export const deleteBlog = async (req, res) => {
   } catch (error) {
     console.error('Error deleting blog post:', error);
     res.status(500).json({ message: 'Error deleting blog post', error: error.message });
+  }
+};
+
+export const monitorReachCount = async (req, res) => {
+  try {
+    // Extract the token from the Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Authorization header missing or invalid' });
+    }
+
+    const token = authHeader.split(' ')[1]; // Extract the token
+    let decoded;
+
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
+    } catch (err) {
+      return res.status(401).json({ message: 'Token verification failed' });
+    }
+
+    const userId = decoded.id; // Extract user ID from decoded token
+    const { blogId, month } = req.body; // Get blogId and month from request parameters
+
+    // Find the blog document for the given month
+    const blogDoc = await Blog.findOne({ month });
+    if (!blogDoc) {
+      return res.status(404).json({ message: 'Blog for specified month not found' });
+    }
+
+    // Find the specific blog post within the month's blog posts
+    const blogPost = blogDoc.blogPosts.id(blogId);
+    if (!blogPost) {
+      return res.status(404).json({ message: 'Blog post not found' });
+    }
+
+    // Access the monthly interaction for the current month and check the reach array
+    let monthlyInteraction = blogPost.monthlyInteraction.get(month);
+    if (!monthlyInteraction) {
+      // If no interaction data exists for this month, initialize it
+      monthlyInteraction = { reach: [] };
+      blogPost.monthlyInteraction.set(month, monthlyInteraction);
+    }
+
+    // Check if the user ID is already in the reach array
+    if (!monthlyInteraction.reach.includes(userId)) {
+      // Add the user ID to the reach array if it doesn’t exist
+      monthlyInteraction.reach.push(userId);
+    } else {
+      // If the user ID is already present, ignore and send response
+      return res.status(200).json({ message: 'User already counted in reach for this blog post' });
+    }
+
+    // Save the updated blog document
+    await blogDoc.save();
+
+    return res.status(200).json({ message: 'User added to reach array successfully' });
+  } catch (error) {
+    console.error('Error updating reach count:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const minitorVisitCount = async (req, res) => {
+  try {
+    // Extract the token from the Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Authorization header missing or invalid' });
+    }
+
+    const token = authHeader.split(' ')[1]; // Extract the token
+    let decoded;
+
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
+    } catch (err) {
+      return res.status(401).json({ message: 'Token verification failed' });
+    }
+
+    const userId = decoded.id; // Extract user ID from decoded token
+    const { blogId, month } = req.body; // Get blogId and month from request parameters
+
+    // Find the blog document for the given month
+    const blogDoc = await Blog.findOne({ month });
+    if (!blogDoc) {
+      return res.status(404).json({ message: 'Blog for specified month not found' });
+    }
+
+    // Find the specific blog post within the month's blog posts
+    const blogPost = blogDoc.blogPosts.id(blogId);
+    if (!blogPost) {
+      return res.status(404).json({ message: 'Blog post not found' });
+    }
+
+    // Access the monthly interaction for the current month and check the reach array
+    let monthlyInteraction = blogPost.monthlyInteraction.get(month);
+    if (!monthlyInteraction) {
+      // If no interaction data exists for this month, initialize it
+      monthlyInteraction = { reach: [] };
+      blogPost.monthlyInteraction.set(month, monthlyInteraction);
+    }
+
+    // Check if the user ID is already in the reach array
+    if (!monthlyInteraction.visits.includes(userId)) {
+      // Add the user ID to the reach array if it doesn’t exist
+      monthlyInteraction.visits.push(userId);
+    } else {
+      // If the user ID is already present, ignore and send response
+      return res.status(200).json({ message: 'User already counted in reach for this blog post' });
+    }
+
+    // Save the updated blog document
+    await blogDoc.save();
+
+    return res.status(200).json({ message: 'User added to reach array successfully' });
+  } catch (error) {
+    console.error('Error updating reach count:', error);
+    return res.status(500).json({ message: 'Server error' });
   }
 };
