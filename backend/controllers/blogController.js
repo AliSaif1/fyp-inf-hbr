@@ -222,7 +222,8 @@ export const getPaginatedBlogs = async (req, res) => {
         };
 
         // Calculate the number of comments
-        const commentsCount = Object.keys(interactions.commentedBy).length;
+        const commentsCount = Object.values(interactions.commentedBy)
+        .reduce((total, commentsArray) => total + commentsArray.length, 0);
 
         // Check if the current user has liked or saved the post
         const currentUser = await User.findById(userId).select('likedPosts savedPosts').lean().exec();
