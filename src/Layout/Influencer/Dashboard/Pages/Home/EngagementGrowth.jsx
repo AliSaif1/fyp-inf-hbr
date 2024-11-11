@@ -37,7 +37,7 @@ const prepareChartData = (blogs, numMonths = 12) => {
         if (monthlyData[month]) {
           const interactions = blog.monthlyInteraction[month];
           monthlyData[month].likes += interactions.likes || 0;
-          monthlyData[month].visits += interactions.visits || 0; // `visits` is used for reach
+          monthlyData[month].visits += interactions.visits.length || 0; // `visits` is used for reach
           if (interactions.commentedBy) {
             Object.keys(interactions.commentedBy).forEach(user => {
               monthlyData[month].comments += interactions.commentedBy[user].length || 0;
