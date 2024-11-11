@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ShowComments from '../Home/showComments';
 
 const ShowBlog = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [showComments, setShowComments] = useState(false);
   const { blogPost } = location.state || {};
+  console.log("Blogs: ", blogPost);
 
   const [liked, setLiked] = useState(blogPost.likedStatus);  // Initialize with the liked status
   const [likesCount, setLikesCount] = useState(blogPost.likes); // Initialize with the likes count
@@ -70,12 +73,13 @@ const ShowBlog = () => {
             </button>
             <p className="ml-2 font-medium">{likesCount}</p>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center" onClick={() => setShowComments(true)}>
             <img src="/Svg/Comment.svg" className="Avatar size-[15px]" alt="Comments" />
             <p className="ml-2 font-medium">{blogPost.commentsCount}</p>
           </div>
         </div>
       </div>
+      <ShowComments postID={blogPost.id} show={showComments} onClose={() => setShowComments(false)} />
     </div>
   );
 };

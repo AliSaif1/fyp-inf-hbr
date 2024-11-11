@@ -18,6 +18,7 @@ const MainBar = () => {
         <Route index element={<Home />} />
         <Route path="Dashboard/*" element={<Home />}>
           <Route index element={<OverView />} />
+          <Route path="Post-Details" element={<ShowBlog />} />
         </Route>
         <Route path='profile' element={<UserProfile/>}/>
         <Route path="Search" element={<Search />} />

@@ -2,6 +2,7 @@ import './Index.css';
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import ShowComments from './showComments';
+import { useNavigate } from 'react-router-dom';
 
 const OverView = () => {
     const [customData, setCustomData] = useState([]);
@@ -78,6 +79,7 @@ const OverView = () => {
                                 isLiked={post.liked}
                                 isSaved={post.saved}
                                 commentsCount={post.commentsCount}
+                                postBody={post.body}
                             />
                         ))}
                         {hasMore && (
@@ -102,7 +104,7 @@ const OverView = () => {
     );
 };
 
-const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle, postID, isLiked, isSaved, commentsCount }) => {
+const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle, postID, isLiked, isSaved, commentsCount, postBody }) => {
   const [imageDimensions, setImageDimensions] = useState({ width: 'auto', height: 'auto' });
   const [liked, setLiked] = useState(isLiked);
   const [savedPost, setSavedPost] = useState(isSaved);
@@ -112,6 +114,7 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
   const [commentCount, setCommentsCount] = useState(commentsCount);
   const [comment, setComment] = useState('');
   const [showComments, setShowComments] = useState(false);
+  const navigate = useNavigate();
 
   const handleImageLoad = (event) => {
     const { naturalWidth, naturalHeight } = event.target;
@@ -158,6 +161,22 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
     }
   }, [postID, savedPost]);
 
+  const handleMoreDetails = () => {
+    navigate('/Dashboard/Post-Details', {
+      state: {
+        blogPost: {
+          imageLink: postImage,
+          title: postTitle,
+          body: postBody,
+          likes: likeCount,
+          commentsCount: commentCount,
+          id: postID,
+          likedStatus: liked
+        },
+      },
+    });
+  };
+
   return (
     <div className="p-4 border border-gray-200 rounded-lg mt-4 text-[9px] xs:text-[10px] sm:text-[13px] md:text-[12px]">
       <div className="flex items-center justify-between space-x-4 mb-2">
@@ -176,6 +195,7 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
       </div>
       <div className="mx-auto flex justify-center" style={{ maxWidth: '500px', maxHeight: '500px' }}>
         <img
+          onClick={handleMoreDetails}
           className="object-right-top object-cover"
           src={postImage}
           alt=""
