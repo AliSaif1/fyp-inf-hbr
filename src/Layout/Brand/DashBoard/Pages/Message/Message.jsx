@@ -723,7 +723,7 @@ const Message = () => {
               <p>No members found</p>
             )}
           </div>
-          ;
+          
           {showGroupOptions && selectedGroup && (
             <div className="popup-overlay">
               <div className="popup-content">
