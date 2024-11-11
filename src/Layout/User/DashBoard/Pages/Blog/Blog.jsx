@@ -69,7 +69,7 @@ const Blog = () => {
               ID={post._id}
               Title={post.title}
               Body={post.body}
-              Time={new Date(post.postedAt).toLocaleTimeString()}
+              Time={new Date(post.postedAt).toLocaleString()}
               Image={post.blogMainImg}
               Likes={post.likes}
               commentsCount={post.commentsCount}
@@ -126,6 +126,53 @@ const BlogPost = ({ ID, Title, Body, Time, Image, Likes, commentsCount, IsLiked 
     }
   };
 
+  const monitorVisitCount = async () => {
+    try {
+      // Check if postTime is a valid string
+      if (!Time || typeof Time !== 'string') {
+        console.error("Invalid postTime:", Time);
+        return; // Exit early if postTime is not valid
+      }
+  
+      // Manually extract the date part (MM/DD/YYYY) from postTime
+      const [datePart] = Time.split(','); // "MM/DD/YYYY"
+      if (!datePart) {
+        console.error("Date part extraction failed:", Time);
+        return; // Exit early if date extraction fails
+      }
+  
+      const [month, day, year] = datePart.split('/'); // Extract month, day, year
+  
+      // Check if the extracted values are valid
+      if (!month || !day || !year) {
+        console.error("Invalid date format:", datePart);
+        return; // Exit early if the date format is invalid
+      }
+  
+      // Construct a valid date string in 'YYYY-MM-DD' format to ensure correct Date parsing
+      const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  
+      // Convert the formattedDate string to a Date object
+      const date = new Date(formattedDate);
+  
+      // Extract the year and month (formatted as 'YYYY-MM')
+      const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  
+      // Send blogId and yearMonth in the request
+      await axios.put('/influencer/minitorVisitCount', 
+        { blogId: ID, month: yearMonth }, // Payload with blogId and month
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`
+          }
+        }
+      );
+      console.log("Reach count updated successfully");
+    } catch (error) {
+      console.error("Error updating reach count:", error);
+    }
+  };
+
   return (
     <div className="bg-white mx-auto sm:w-[500px] mdm:w-[600px] lg:w-[700px] rounded-xl p-2 text-[9px] xs:text-[10px] sm:text-[13px] md:text-[11px]">
       <div className="p-2 grid grid-cols-12">
@@ -135,7 +182,10 @@ const BlogPost = ({ ID, Title, Body, Time, Image, Likes, commentsCount, IsLiked 
             {truncatedBody}
             {Body.length > 250 && (
               <span
-                onClick={handleReadMore}
+                onClick={ ()=> {
+                  handleReadMore();
+                  monitorVisitCount();
+                }}
                 className="ml-2 text-orange-500 cursor-pointer"
               >
                 Read more
