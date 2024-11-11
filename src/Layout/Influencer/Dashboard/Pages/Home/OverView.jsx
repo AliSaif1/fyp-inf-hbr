@@ -294,6 +294,7 @@ const OverViewLayout = ({ shares, likes, comments, engagement_Rate, reach, total
   const getStatus = (percent) => {
     return percent >= 0 ? 1 : 0;
   };
+  const earnings = totalEarnings.currentMonth * .90;
 
   return (
     <div className="bg-white w-full mt-10 rounded-3xl">
@@ -338,7 +339,7 @@ const OverViewLayout = ({ shares, likes, comments, engagement_Rate, reach, total
             />
             <CardWithImage
               Heading="Earnings"
-              totalNumbers={totalEarnings.currentMonth}
+              totalNumbers={earnings}
               Percentage={totalEarnings.change}
               time="LastMonth"
               ImageSource="card2.png"
