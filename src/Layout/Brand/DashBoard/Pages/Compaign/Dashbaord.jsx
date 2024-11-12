@@ -430,6 +430,8 @@ const InfluencerList = ({ ImageSrc, Name, age, ColorBorder, Status, TextColor, b
       const data = await response.json();
       console.log('Contract approved:', data);
       setShowLinks(false); // Close the pop-up after approval
+      navigate('/Compaign');
+
     } catch (error) {
       console.error('Error approving contract:', error);
       setError('Failed to approve contract. Please try again later.');
