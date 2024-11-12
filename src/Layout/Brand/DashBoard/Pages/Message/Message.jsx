@@ -114,7 +114,7 @@ const Message = () => {
         const existingContactIndex = prevContacts.findIndex(
           (contact) => contact.id === data.sender
         );
-       
+
         if (existingContactIndex === -1) {
           fetchContacts();
           // New contact received, add to the list
@@ -222,11 +222,9 @@ const Message = () => {
   // 1. Fetch contacts on page load or if logged-in user ID changes
   useEffect(() => {
     if (loggedInUserId) {
-    
       fetchContacts();
     }
   }, [loggedInUserId]);
-
 
   const fetchContacts = async () => {
     try {
@@ -244,7 +242,6 @@ const Message = () => {
       console.error("Error fetching contacts:", error);
     }
   };
-
 
   // 2. Fetch messages for the selected chat when contacts load or selected chat changes
   useEffect(() => {
@@ -296,30 +293,63 @@ const Message = () => {
       setNoMessagesFound(true);
     }
   };
+  //   const [isAdmin,setIsAdmin]=useState([]);
+  // useEffect(() => {
+  //   // Skip fetching if user ID is not available
+  //   if (!loggedInUserId) return;
+
+  //   const fetchGroups = async () => {
+  //     setIsLoading(true); // Start loading before API call
+  //     try {
+  //       const response = await axios.get(`/api/groups/${loggedInUserId}`);
+  //       setGroups(response.data.groups || []); // `response.data.groups` should contain the groups array
+  //       console.log(
+  //         "Grouips -------------------Testing-----------",
+  //         response.data.groups
+  //       );
+    
+  //       console.log("Response the Admin", response.data.groups[0].admin._id);
+  //     } catch (error) {
+  //       console.error("Error fetching groups:", error);
+  //     } finally {
+  //       setIsLoading(false); // Stop loading after API call
+  //     }
+  //   };
+
+  //   // Fetch groups only if loggedInUserId has changed
+  //   fetchGroups();
+  // }, [loggedInUserId]);
+
 
   useEffect(() => {
     // Skip fetching if user ID is not available
     if (!loggedInUserId) return;
-
+  
     const fetchGroups = async () => {
       setIsLoading(true); // Start loading before API call
       try {
         const response = await axios.get(`/api/groups/${loggedInUserId}`);
-        setGroups(response.data.groups || []); // `response.data.groups` should contain the groups array
-        console.log(
-          "Grouips -------------------Testing-----------",
-          response.data.groups
-        );
+        
+        // Check if the response contains groups data
+        const groupsWithAdminFlag = (response.data.groups || []).map(group => ({
+          ...group,
+          isAdmin: group.admin._id === loggedInUserId, // Add isAdmin field
+        }));
+  
+        setGroups(groupsWithAdminFlag); // Set the updated groups data
+        
+        console.log("Groups with isAdmin flag:", groupsWithAdminFlag);
       } catch (error) {
         console.error("Error fetching groups:", error);
       } finally {
         setIsLoading(false); // Stop loading after API call
       }
     };
-
+  
     // Fetch groups only if loggedInUserId has changed
     fetchGroups();
   }, [loggedInUserId]);
+  
 
   const modifyGroup = async (groupId) => {
     try {
@@ -697,7 +727,7 @@ const Message = () => {
               <p>No members found</p>
             )}
           </div>
-          {showGroupOptions && selectedGroup && (
+          {showGroupOptions && selectedGroup &&  (
             <div className="popup-overlay">
               <div className="popup-content">
                 <p>Edit Group</p>
@@ -723,6 +753,7 @@ const Message = () => {
                     onClick={() => handleSelectGroup(group)} // Group click handler
                     onDelete={() => deleteGroup(group._id)} // Wrap delete in an arrow function
                     onModify={() => modifyGroup(group._id)} // Modify group handler
+                    isAdmin={group.isAdmin}
                   />
                 </div>
               ))
