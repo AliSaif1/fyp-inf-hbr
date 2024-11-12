@@ -5,6 +5,7 @@ import NavBar from './NavBar';
 import Cookies from 'js-cookie';
 import axios from "axios";
 import { useState,  useRef } from 'react';
+import Loader from '../../Components/Loaders/Loaders';
 
 const UserSignUp = () => {
   const [stepperIndex, setStepperIndex] = useState(0);
@@ -229,6 +230,7 @@ const BasicDetails = ({ nextStep, onChange }) => {
 };
 
 
+
 const TermsAndConditions = ({ nextStep, data }) => {
   console.log(data);
 
@@ -237,48 +239,58 @@ const TermsAndConditions = ({ nextStep, data }) => {
   const [accepted, setAccepted] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);  // New loading state
 
   const handleCheckboxChange = (e) => {
     setAccepted(e.target.checked);
   };
 
   const handleNext = async () => {
-    const userId =  Cookies.get('userId');
+    const userId = Cookies.get('userId');
     if (accepted) {
       const formData = new FormData();
-      formData.append('userId',userId)
+      formData.append('userId', userId);
       formData.append('fullName', data.fullName);
-      // formData.append('userName', data.userName);
       formData.append('gender', data.gender);
       formData.append('age', data.age);
       formData.append('category', data.category);
       formData.append('photo', data.photo); // Append the photo file
+
       const token = Cookies.get('token');
+
+      // Set loading state to true while making the request
+      setIsLoading(true);
+
       try {
         // Replace with your API URL
         const response = await axios.post(`/api/influencerInfo`, formData, {
-        
           withCredentials: true,
         });
-  
+
         // Handle success response
         console.log(response.data);
         setMessage(response.data.message);
-  
+
         // Only proceed to the next step if there was no error
         nextStep();
       } catch (error) {
         // Handle error response
         console.error(error);
         setError(error.response?.data?.message || "Something went wrong");
+      } finally {
+        // Set loading state to false after the request completes (success or failure)
+        setIsLoading(false);
       }
     }
   };
-  
 
   return (
     <>
-      <img className="md:flex w-60 xs:w-96 h-[150px] xs:h-[250px] mt-3 z-20" src="/Svg/SignUp3.svg" alt="" />
+      <img
+        className="md:flex w-60 xs:w-96 h-[150px] xs:h-[250px] mt-3 z-20"
+        src="/Svg/SignUp3.svg"
+        alt=""
+      />
 
       <div className="sm:w-[500px] flex mt-3">
         <input
@@ -287,22 +299,31 @@ const TermsAndConditions = ({ nextStep, data }) => {
           onChange={handleCheckboxChange}
           id="terms-checkbox"
         />
-        <h1 className="ml-2">I confirm that I have read and accept the terms and conditions and privacy policy.</h1>
+        <h1 className="ml-2">
+          I confirm that I have read and accept the terms and conditions and privacy policy.
+        </h1>
       </div>
 
       <div
         onClick={handleNext}
-        className={`OrangeButtonWithText-v2 flex justify-center py-2 w-[100px] xs:w-[150px] mt-3 xs:mt-5 mx-auto ${!accepted ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-          }`}
+        className={`OrangeButtonWithText-v2 flex justify-center py-2 w-[100px] xs:w-[150px] mt-3 xs:mt-5 mx-auto ${
+          !accepted ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+        }`}
         style={{ pointerEvents: accepted ? 'auto' : 'none' }} // Ensure the button is not clickable when disabled
       >
         Next
       </div>
+
+      {isLoading && (
+       <Loader/>
+      )}
+
       {message && <p style={{ color: "black" }}>Account Created Successfully</p>}
-      {error && <p style={{ color: "red" }}>Something Went wrong+{error}</p>}
+      {error && <p style={{ color: "red" }}>Something went wrong: {error}</p>}
     </>
   );
 };
+
 
 
 

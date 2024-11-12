@@ -176,11 +176,9 @@ const BasicDetails = ({ nextStep, onChange }) => {
 
   return (
     <>
+  
       <img className="hidden lg:flex w-96 absolute bottom-2 -left-0 h-[300px] z-20" src="/Svg/SignUp4.svg" alt="" />
       <div className="sm:items-start flex flex-col items-center justify-center">
-        {loading && (
-          <Loader/>
-        )}
         <div className="flex flex-col-reverse sm:items-center sm:flex-row justify-between">
           <div>
             <h5 className="poppins-regular mt-1">Full Name</h5>
@@ -277,6 +275,9 @@ const BasicDetails = ({ nextStep, onChange }) => {
         >
           Next
         </div>
+        {loading && (
+      <Loader/>
+    )}
         {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
       </div>
     </>

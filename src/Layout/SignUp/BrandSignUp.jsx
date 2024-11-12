@@ -6,6 +6,7 @@ import './index.css';
 import NavBar from './NavBar';
 import Cookies from 'js-cookie';
 import axios from "axios";
+import Loader from '../../Components/Loaders/Loaders';
 
 
 const BrandSignUp = () => {
@@ -372,10 +373,8 @@ const TermsAndConditions = ({ nextStep, data }) => {
   const [accepted, setAccepted] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const userId =  Cookies.get('userId');
-
-  console.log("Console userId is ")
-  console.log(userId)
+  const [isLoading, setIsLoading] = useState(false);  // New loading state
+  const userId = Cookies.get('userId');
 
   const url = `${import.meta.env.VITE_SERVER_BASE_URL}`;
 
@@ -386,80 +385,59 @@ const TermsAndConditions = ({ nextStep, data }) => {
   const handleNext = async () => {
     if (accepted) {
       const formData = new FormData();
+      formData.append('userId', userId);
+      formData.append('userName', data.brandUserName);
+      formData.append('position', data.basicDetails.position);
+      formData.append('companySize', data.basicDetails.companySize);
+      formData.append('influencersWorkedWith', data.basicDetails.influencerSize);
+      formData.append('brandName', data.companyDetails.brandName);
+      formData.append('website', data.companyDetails.websiteLink);
+      formData.append('category', data.companyDetails.category);
+      formData.append('logo', data.companyDetails.photo); // Append the File object
 
-   formData.append('userId',userId)
-   formData.append('userName',data.brandUserName   )
-   formData.append('position',data.basicDetails.position   )
-   formData.append('companySize',data.basicDetails.companySize)
-   formData.append('influencersWorkedWith',data.basicDetails.influencerSize)
-   formData.append('brandName',data.companyDetails.brandName)
-   formData.append('website',data.companyDetails.websiteLink)
-   formData.append('category',data.companyDetails.category)
-      
-      // Append the photo file (make sure you're appending the File object, not the URL)
-
-      formData.append('logo', data.companyDetails.photo); // `photo` should now be the File object
-
-
-     
       const token = Cookies.get('token');
 
-      
+      // Set loading state to true while making the request
+      setIsLoading(true);
 
-
-      // try {
-      //   // const loginToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmM4OTRkZjExOGUxNmEwMTcwNDM2NzgiLCJpYXQiOjE3MjQ0MjEzOTksImV4cCI6MTcyNTAyNjE5OX0.hB1AhsZi0ZmWQf-uqO7lgYfRZrBwKidFV2vh7IaITks'; // Replace with your actual token
-      //   const loginToken = token; // Replace with your actual token
-      //   const response = await axios.post(`http://localhost:3000/api/Brand`, formData);
-
-      //   // Handle success response
-      //   console.log(response.data);
-      //   setMessage(response.data.message);
-
-      //   // Only proceed to the next step if there was no error
-      //   nextStep();
-      // } catch (error) {
-      //   // Handle error response
-      //   console.log(data);
-      //   console.error(error);
-      //   setError(error.response?.data?.message || "Something went wrong");
-      // }
       try {
-    
         const response = await fetch('/api/Brand', {
-            method: 'POST',
-            body: formData,
-            credentials: 'include'  // Include credentials (cookies) in the request
+          method: 'POST',
+          body: formData,
+          credentials: 'include', // Include credentials (cookies) in the request
         });
-    
+
         if (!response.ok) {
-            // Handle non-200 responses
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Something went wrong");
+          // Handle non-200 responses
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Something went wrong');
         }
-    
+
         const data = await response.json();
-    
         // Handle success response
         console.log(data);
         setMessage(data.message);
-    
+
         // Only proceed to the next step if there was no error
         nextStep();
-    } catch (error) {
+      } catch (error) {
         // Handle error response
         console.error(error);
         setError(error.message);
-    }
-    
-
+      } finally {
+        // Set loading state to false after the request completes (success or failure)
+        setIsLoading(false);
+      }
     }
   };
 
-
   return (
     <>
-      <img className="md:flex w-52 xs:w-96 h-[150px] xs:h-[250px] mt-10 z-20" src="/Svg/SignUp3.svg" alt="" />
+      <img
+        className="md:flex w-52 xs:w-96 h-[150px] xs:h-[250px] mt-10 z-20"
+        src="/Svg/SignUp3.svg"
+        alt=""
+      />
 
       <div className="sm:w-[500px] flex mt-3">
         <input
@@ -468,22 +446,31 @@ const TermsAndConditions = ({ nextStep, data }) => {
           onChange={handleCheckboxChange}
           id="terms-checkbox"
         />
-        <h1 className="ml-2">I confirm that I have read and accept the terms and conditions and privacy policy.</h1>
+        <h1 className="ml-2">
+          I confirm that I have read and accept the terms and conditions and privacy policy.
+        </h1>
       </div>
 
       <div
         onClick={handleNext}
-        className={`OrangeButtonWithText-v2 flex justify-center py-2 w-[100px] xs:w-[150px] mt-3 xs:mt-5 mx-auto ${!accepted ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-          }`}
+        className={`OrangeButtonWithText-v2 flex justify-center py-2 w-[100px] xs:w-[150px] mt-3 xs:mt-5 mx-auto ${
+          !accepted ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+        }`}
         style={{ pointerEvents: accepted ? 'auto' : 'none' }} // Ensure the button is not clickable when disabled
       >
         Next
       </div>
-      {message && <p style={{ color: "black" }}>Account Created Successfully</p>}
-      {error && <p style={{ color: "red" }}>Something Went wrong+{error}</p>}
+
+      {isLoading && (
+       <Loader/>
+      )}
+
+      {message && <p style={{ color: 'black' }}>Account Created Successfully</p>}
+      {error && <p style={{ color: 'red' }}>Something went wrong: {error}</p>}
     </>
   );
 };
+
 
 const Welcome = ({ data }) => {
 
