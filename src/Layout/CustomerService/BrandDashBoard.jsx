@@ -6,6 +6,8 @@ import BrandDashBoardTemplate from '../../Components/DashBoardTemplate/DashBoard
 import HomeIcon from '../../Components/Svg/HomeIcon';
 import CompaignIcon from '../../Components/Svg/CompaignIcon';
 import MainBar from './MainBar';
+import InfluencerIcon from '../../Components/Svg/InfluencerIcon';
+import WithDrawPaymentIcon from '../../Components/Svg/WithDrawPaymentIcon';
 
 
 const BrandDashBoard = () => {
@@ -18,7 +20,7 @@ const BrandDashBoard = () => {
     
     // Used to display the Icon and Its name on Hover and when Click address
     //image ,name hover,link 
-    let IconNames = [['HomeIcon', 'Dashboard', '/Dashboard'], ['Queries', 'Queries', 'Queries'],['Payment', 'Payment', 'Payment']]
+    let IconNames = [['HomeIcon', 'Dashboard', '/Dashboard'], ['Queries', 'Queries', 'Queries'],['Payment', 'Payment', 'Payment'],['Influencer', 'Verify Influencer', 'Influencer'],['WithDraw', 'WithDraw Request', 'WithDraw']]
 
     // It will navigate the page upon the user itself add URL orr by navigate funtion when user Click 
     // It will the Active Button according to 0,1,2,3,4,5,6
@@ -29,6 +31,8 @@ const BrandDashBoard = () => {
       { icon: <HomeIcon color="white" />, label: 'Dashboard', navigate: "/Dashboard" },
       { icon: <CompaignIcon color="white" />, label: 'Queries', navigate: "/Queries" },
       { icon: <CompaignIcon color="white" />, label: 'Payment', navigate: "/Payment" },
+      { icon: <InfluencerIcon color="white" />, label: 'Verify Influencer', navigate: "/Influencer" },
+      { icon: <WithDrawPaymentIcon color="white" />, label: 'WithDraw Request', navigate: "/WithDraw" },
     ];
 
     return {  IconNames, Pages, menuItems }

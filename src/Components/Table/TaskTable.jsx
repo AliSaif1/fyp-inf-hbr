@@ -15,7 +15,8 @@ import DeleteIcon from './DeleteIcon';
 import User from './User';
 import { DATA } from './data';
 import useCurrentScreenSize from './useCurrentScreenSize';
-
+import ScreenSizeDisplay from '../../useCurrentScreenSize';
+import IssueProfile from '../Model/IssueProfile';
 import Modal from './Model';
 
 

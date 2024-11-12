@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import TaskTable from './TaskTable';
 import Filters from './Filters';
-import Loader from '../Loaders';
+import Loader from '../Loaders/Loaders';
 import CustomLoader from '../Loaders/CustomLoader';
 import TaskTableUser from './TaskTableUser';
-import Cookies from 'js-cookie';
 
 // Status constants
 const STATUS_PENDING = { id: 1, name: "Pending" };
@@ -35,18 +34,16 @@ const FetchDataUser = () => {
         return status;
     }
   };
-console.log("data is ")
-console.log(data)
+  console.log("data is ")
+  console.log(data)
   // Fetch data function
   const fetchData = async () => {
-
-    // const userId = '67291b58692bcdb0ac1082cb'
-    const userId = Cookies.get('userId');
+    const userId = '67291b58692bcdb0ac1082cb'
     setLoading(true); // Set loading state to true when fetching starts
     const url = `${import.meta.env.VITE_SERVER_BASE_URL}`;
     try {
       const statusQuery = filterValue ? `&filter=${filterValue}` : ''; // Add status filter if selected
-      const url2= `${url}/Support/User/issues?page=${pagination.pageIndex + 1}&userId=${userId}&search=${searchTerm}${statusQuery}`;
+      const url2 = `${url}/Support/User/issues?page=${pagination.pageIndex + 1}&userId=${userId}&search=${searchTerm}${statusQuery}`;
       console.log("URl is")
       console.log(url2)
       const response = await fetch(url2);
@@ -85,7 +82,7 @@ console.log(data)
 
   return (
     <>
-      <div className='text-[9px]  sm:text-[10px] mdm:text-[12px] flex justify-center flex-col items-center montserrat poppins-regular mt-5 mb-10 w-full'>
+      <div className='text-[9px] sm:text-[10px] mdm:text-[12px] flex justify-center flex-col items-center montserrat poppins-regular mt-5 mb-10 w-full'>
         <div className="bg-white p-4 rounded-xl lg:w-[600px]">
           {/* Always show Filters component */}
           <Filters searchTerm={searchTerm} setSearchTerm={setSearchTerm} setFilterValue={setFilterValue} />

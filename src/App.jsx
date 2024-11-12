@@ -19,6 +19,7 @@ import EmailVerify from './Layout/Login/EmailVerify';
 import VerifyEmail from './Layout/Login/VerifyEmail';
 import ForgetPassword from './Layout/Login/ForgetPassword';
 import Login2 from './Layout/Login/Login2';
+import CustomerRoutes from './Layout/CustomerService/CustomerRoutes';
 
 const App = () => {
 
@@ -41,9 +42,13 @@ const App = () => {
         <BrowserRouter>
 
 
+        {/* <Routes>
+  <Route path='/*' element={<CustomerRoutes/>}/>
+</Routes> */}
 
 
-          <Routes>
+
+          {/* <Routes>
 
             <Route path="/check/users/:id/reset-password/:token" element={<PasswordReset />} />
             <Route path="/check/users/:id/verify/:token" element={<EmailVerify />} />
@@ -60,7 +65,11 @@ const App = () => {
 
             <Route path="/*" element={<Authentication />} />
 
-          </Routes>
+
+          </Routes> */}
+<Routes>
+  <Route path='/*' element={<CustomerRoutes/>}/>
+</Routes>
 
         </BrowserRouter>
 

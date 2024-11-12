@@ -5,7 +5,7 @@ import './index.css';
 import LoginSignNavBar from '../../Components/LoginSignNavBar/LoginSignNavBar';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
-import Loader from '../../Components/Loaders'; // Import your loader component
+import Loader from '../../Components/Loaders/Loaders'; // Import your loader component
 import PopOver from '../../Components/PopOver';
 
 import PasswordInput from '../../Components/Input/PasswordInput';
@@ -46,11 +46,11 @@ const Login2 = () => {
         });
         console.log("response is  and check the token in it ")
         console.log(res)
-          // Store the token in localStorage
-          if (localStorage.getItem('authToken')) {
-            localStorage.removeItem('authToken');
-          }
-          localStorage.setItem('authToken', res.token);
+        // Store the token in localStorage
+        if (localStorage.getItem('authToken')) {
+          localStorage.removeItem('authToken');
+        }
+        localStorage.setItem('authToken', res.token);
         setMsg(res.token);
         navigate('/');
       } catch (error) {

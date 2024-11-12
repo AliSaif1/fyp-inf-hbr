@@ -121,8 +121,8 @@ const CreateIssue = ({ onClose }) => {
 
     return (
         <>
-            <div className='text-[14px] z-50'>
-                <div className={`fixed inset-0 flex justify-center z-50 items-center bg-black bg-opacity-50  overflow-y-scroll`}>
+            <div className='text-[14px]'>
+                <div className={`fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-30 overflow-y-scroll`}>
                     <div className='p-10 h-screen'>
                         <div className="bg-white p-4 rounded-lg w-[300px] md:w-[500px]">
                             <img

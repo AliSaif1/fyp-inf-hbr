@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import Loader from '../../Components/Loaders';
+import Loader from '../../Components/Loaders/Loaders';
 import PopOver from '../../Components/PopOver';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';

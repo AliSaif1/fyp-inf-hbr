@@ -15,7 +15,11 @@ const BORDER_COLORS = {
   'Pending': '  border-[#FB773F] text-orange-500 ',
   'Resolved': 'text-green-500 border-[#1ce14a]  ',
   'Rejected': ' text-black/70 border-[#00000070]',
-  // Add more status-to-color mappings as needed
+  'Payment Processing': ' border-[#FB773F] text-orange-500',
+  'pending': '  border-[#FB773F] text-orange-500 ',
+  'approved': 'text-green-500 border-[#1ce14a]  ',
+
+
 };
 
 export const ColorIcon = ({ color, ...props }) => (

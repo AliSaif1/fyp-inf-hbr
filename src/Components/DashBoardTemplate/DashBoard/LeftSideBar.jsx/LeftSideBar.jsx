@@ -70,7 +70,7 @@ const LeftSideBar = ({CustomButtons,IconNames,Pages,activeButton,setactiveButton
             <div className='  '>
               {/* Contains the Buttons of Left Side Bar */}
               {/* Search Icon  */}
-              <div
+              {CustomButtons && <div
                 onClick={() => { HandleClick(5, CustomButtons[0]['link']) }}
                 onMouseEnter={() => { setisHover(0) }}
                 onMouseLeave={() => { setisHover(-1) }}
@@ -79,7 +79,7 @@ const LeftSideBar = ({CustomButtons,IconNames,Pages,activeButton,setactiveButton
                 {isHover === 0 ? <div className=' absolute w-[120px] right-[-135px] text-center border-[2px] rounded-lg  border-red-400 Button'>{CustomButtons[0]['name']}</div> : ""}
 
                 <img src={CustomButtons[0]['ImageSrc']} alt="" />
-              </div>
+              </div>}
 
               {/* Other's Icon  */}
               <div className=' mt-10 flex flex-col gap-4'>
@@ -94,7 +94,7 @@ const LeftSideBar = ({CustomButtons,IconNames,Pages,activeButton,setactiveButton
           </div>
 
           {/* Info Icon  */}
-          <div
+          {CustomButtons && <div
             onMouseEnter={() => { setisHover(1) }}
             onMouseLeave={() => { setisHover(-1) }}
             onClick={() => { HandleClick(6, CustomButtons[1]['link']) }}
@@ -104,7 +104,7 @@ const LeftSideBar = ({CustomButtons,IconNames,Pages,activeButton,setactiveButton
 
             <img src={CustomButtons[1]['ImageSrc']} alt="" />
 
-          </div>
+          </div>}
         </div>
       </div>
     </>

@@ -5,6 +5,8 @@ import ErrorPage from './DashBoard/Pages/ErrorPage/ErrorPage';
 import Queries from './DashBoard/Pages/Queries/Queries';
 import Contract from './DashBoard/Pages/Queries/Contract';
 import Payment from './DashBoard/Pages/Payment/Payment';
+import VerifyInfluencer from './DashBoard/Pages/VerifyInfluencer/VerifyInfluencer';
+import WithDrawPayment from './DashBoard/Pages/WithDrawPayment/WithDrawPayment';
 
 const MainBar = () => {
   return (
@@ -26,6 +28,14 @@ const MainBar = () => {
 
         <Route path='Payment'  >
         <Route index element={<Payment />} />
+        
+        </Route>
+        <Route path='Influencer'  >
+        <Route index element={<VerifyInfluencer />} />
+        
+        </Route>
+        <Route path='WithDraw'  >
+        <Route index element={<WithDrawPayment />} />
         
         </Route>
 

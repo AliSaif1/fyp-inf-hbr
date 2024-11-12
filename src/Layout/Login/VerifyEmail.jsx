@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { motion,AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import './index.css';
 import axios from 'axios';
-import Loader from '../../Components/Loaders';
+import Loader from '../../Components/Loaders/Loaders';
 import PopOver from '../../Components/PopOver';
 
 const VerifyEmail = () => {
@@ -20,7 +20,7 @@ const VerifyEmail = () => {
     try {
       const response = await axios.post(`${url}/Newauth/users/resend`, { email: email || "sp21-bse-033@cuilahore.edu.pk" });
       setMsg(response.data.message || "Verification email has been resent.");
-      setError(""); 
+      setError("");
       setShowPopOver(false); // Hide pop-over if successful
     } catch (err) {
       setError(err.response?.data?.error || "Failed to resend email.");
@@ -40,10 +40,10 @@ const VerifyEmail = () => {
       {loading && <Loader />}
 
       {/* Pop-Over for Errors */}
-      <AnimatePresence>      {showPopOver && <PopOver msg={error} closePopOver={closePopOver}/>
+      <AnimatePresence>      {showPopOver && <PopOver msg={error} closePopOver={closePopOver} />
       }
 
-</AnimatePresence>
+      </AnimatePresence>
 
 
       <div className='h-screen items-center sm:h-[550px] lg:h-screen flex bgSignUp text-[10px] sm:text-[11px] mdm:text-[12px]'>

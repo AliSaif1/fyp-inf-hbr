@@ -18,13 +18,18 @@ import useCurrentScreenSize from './useCurrentScreenSize';
 import ScreenSizeDisplay from '../../useCurrentScreenSize';
 import IssueProfile from '../Model/IssueProfile';
 import Modal from './Model';
-import UserModal from './UserModal';
+import Brand from './brand';
+import PaymentModel from './PaymentModel';
+import InfluencerModel from './InfluencerModel';
+import WithDrawModel from './WithDrawModel';
 
 
 
 
-const TaskTableUser = ({ DATA, pagination, setPagination, pageCount, totalUsers }) => {
+const TaskTableWithDraw = ({ DATA, pagination, setPagination, pageCount, totalUsers ,Update ,setUpdate}) => {
 
+  console.log("data is Influencer")
+  console.log(DATA )
   const [data, setData] = useState(DATA);
   const [selectedRows, setSelectedRows] = useState({});
   const [selectedRowData, setselectedRowData] = useState(null)
@@ -81,34 +86,16 @@ const TaskTableUser = ({ DATA, pagination, setPagination, pageCount, totalUsers 
 
   // Define the columns based on the current screen size
   const columns = [
+    {
+      accessorKey: 'userID',
+      header: 'Influencer ',
+      cell: User,
+      size: (screenSize === 'xxs' || screenSize === 'xs' || screenSize === 'sm') ? 20 : 200, // Dynamically adjust size
+      enableColumnFilter: true,
+    },
 
 
-
-    // Conditionally include the Description column only on larger screens
-    ...(screenSize !== 'xxs' && screenSize !== 'xs' && screenSize !== 'sm'
-      ? [
-        {
-          accessorKey: 'issue',
-          header: 'Issue',
-          cell: (props) => <p className="poppins-semibold text-[#1a3048cc]">{props.getValue()}</p>,
-          size: getColumnSize(80), // Dynamically adjust size
-        },
-      ]
-      : ""), // Exclude Description column on small screens
-
-    // Conditionally include the Description column only on larger screens
-    ...(screenSize !== 'xxs' && screenSize !== 'xs' && screenSize !== 'sm'
-      ?
-      //  (console.log('Adding Description column for screen size:', screenSize),
-      [
-        {
-          accessorKey: 'description',
-          header: 'Description',
-          cell: (props) => <p className="poppins-semibold text-[#1a3048cc]">{props.getValue()}</p>,
-          size: getColumnSize(180),
-        },
-      ]
-      : ""), // Exclude Description column on small screens
+  
     {
       accessorKey: 'status',
       header: 'Status',
@@ -164,7 +151,13 @@ const TaskTableUser = ({ DATA, pagination, setPagination, pageCount, totalUsers 
 
   return (
     <>
+
+
+
+
       {/* Table Top NavBar */}
+
+
       <div className=''>
         {/* Render Table Headers */}
         <TableHeader table={table} />
@@ -175,7 +168,11 @@ const TaskTableUser = ({ DATA, pagination, setPagination, pageCount, totalUsers 
 
       </div>
 
-      {selectedRowData && <UserModal rowData={selectedRowData} onClose={() => setselectedRowData(null)} />}
+
+
+
+
+      {selectedRowData && <WithDrawModel Update={Update} setUpdate={setUpdate} rowData={selectedRowData} onClose={() => setselectedRowData(null)} />}
 
     </>
   );
@@ -231,6 +228,7 @@ const TableRow = ({ table, selectedRows, setSelectedRows, setselectedRowData }) 
 
 
 const TableFooter = ({ table, selectedRows, removeSelectedRows, totalUsers }) => {
+
 
   return <>
 
@@ -321,4 +319,4 @@ const TableHeader = ({ table, }) => {
 
 
 
-export default TaskTableUser;
+export default TaskTableWithDraw;

@@ -10,6 +10,7 @@ import brands from "../../models/brands.js";
 import contractModel from "../../models/contractModel.js";
 import User from '../../models/user.js'
 import sendEmail from "../../utils/sendEmail.js";
+import withdrawalRequest from "../../models/withdrawalRequest.js";
 
 
 router.get("/", (req, res) => {
@@ -470,5 +471,137 @@ router.post('/delete', async (req, res) => {
         res.status(500).json({ message: 'Error deleting issues', error: error.message });
     }
 });
+
+
+
+//////////////////////////////////Influncer Verifu//////////////////////////////////////////////////
+
+router.get('/InfluencerVerify', async (req, res) => {
+    try {
+      // Find all influencers who are not verified and have uploaded a verification attachment
+      const unverifiedInfluencers = await User.find({
+        userType: 'influencer',
+        verified: false,
+        verificationAttachment: { $exists: true, $ne: null }, // checks if there's an attachment
+        uploaded: true // ensure 'uploaded' is true as well
+      });
+  
+      // Format the result as [{ influencerData: {}, status: true/false }]
+      const formattedResponse = unverifiedInfluencers.map(influencer => ({
+        influencerData: influencer,
+        status: influencer.verified
+      }));
+  
+      res.status(200).json(formattedResponse);
+    } catch (error) {
+      console.error('Error fetching unverified influencers:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+  
+
+
+
+  router.post('/influencerVerifyStatus', async (req, res) => {
+    const { influencerId, status } = req.body;
+    console.log(req.body)
+  
+    try {
+      // Find the influencer by ID
+      const influencer = await User.findById(influencerId);
+  
+      if (!influencer || influencer.userType !== 'influencer') {
+        return res.status(404).json({ message: 'Influencer not found' });
+      }
+  
+      // Update the verified status based on the provided status
+      influencer.verified = status;
+  
+      // Save the updated influencer data
+      await influencer.save();
+  
+      // Prepare email message and attachment content
+      const subject = status ? "Verification Accepted" : "Verification Rejected";
+      const message = status
+        ? "Congratulations! Your verification has been accepted."
+        : "Your verification has been rejected. Please re-upload the necessary documents.";
+  
+      const attachment = influencer.verificationAttachment;
+  
+      // Send email notification
+      await sendEmail(
+        influencer.email,
+        subject,
+        message,
+        attachment
+      );
+  
+      res.status(200).json({ message: `Influencer verification ${status ? "approved" : "rejected"} and email sent.` });
+    } catch (error) {
+      console.error('Error updating influencer verification status:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+
+  
+
+// ///////////////////////////// WithDraw payment ///////////////////////////////]
+
+
+// GET /withdrawRequest - Retrieve all withdrawal requests
+router.get('/withdrawRequest', async (req, res) => {
+    try {
+        const withdrawalRequests = await withdrawalRequest.find()
+            .populate('userID', 'fullName email photo') // Adjust fields to populate as needed
+            .populate('accountID'); // Populating accountID for related account details
+        res.status(200).json(withdrawalRequests);
+    } catch (error) {
+        console.error('Error retrieving withdrawal requests:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
+
+// POST /withdraw/Review - Review a withdrawal request by ID
+router.post('/withdraw/Review', async (req, res) => {
+    const { requestId, status } = req.body; // ID and new status from the request body
+
+    try {
+        // Find the withdrawal request by ID
+        const withdrawalRequestData = await withdrawalRequest.findById(requestId)
+            .populate('userID', 'fullName email'); // Populate user details for email
+
+        if (!withdrawalRequestData) {
+            return res.status(404).json({ message: 'Withdrawal request not found' });
+        }
+
+        // Update the status based on the provided status
+        withdrawalRequestData.status = status ? 'approved' : 'rejected';
+
+        // Save the updated withdrawal request
+        await withdrawalRequestData.save();
+
+        // Prepare email message content based on status
+        const subject = status ? "Withdrawal Request Approved" : "Withdrawal Request Rejected";
+        const message = status
+            ? "Your withdrawal request has been approved. The funds will be transferred shortly."
+            : "Your withdrawal request has been rejected. Please check your account details or contact support.";
+
+        // Send email notification
+        await sendEmail(
+            withdrawalRequestData.userID.email,
+            subject,
+            message
+        );
+
+        res.status(200).json({ message: `Withdrawal request ${status ? "approved" : "rejected"} and email sent.` });
+    } catch (error) {
+        console.error('Error reviewing withdrawal request:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 
 export default router

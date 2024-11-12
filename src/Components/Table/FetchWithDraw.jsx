@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import TaskTable from './TaskTable';
 import Filters from './Filters';
-import TaskTablePayment from './TaskTablePayment';
-import Loaders from '../Loaders/Loaders';
+import Loader from '../Loaders/Loaders';
 import CustomLoader from '../Loaders/CustomLoader';
+import TaskTablePayment from './TaskTablePayment';
+import TaskTableInfluencer from './TaskTableInfluencer';
+import TaskTableWithDraw from './TaskTableWithDraw';
 
 // Status constants
-const STATUS_PENDING = { id: 1, name: "Pending" };
+const STATUS_PENDING = { id: 1, name: "pending" };
 const STATUS_IN_REVIEW = { id: 2, name: "Payment Processing" };
-const STATUS_RESOLVED = { id: 3, name: "Resolved" };
+const STATUS_RESOLVED = { id: 3, name: "Approved " };
 const STATUS_REJECTED = { id: 4, name: "Rejected" };
 
-const FetchPaymentData = () => {
+const FetchWithDraw = () => {
   const [data, setData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterValue, setFilterValue] = useState("");  // Status filter from the dropdown
@@ -25,13 +27,9 @@ const FetchPaymentData = () => {
   // Function to map status strings to the defined constants
   const mapStatus = (status) => {
     switch (status) {
-      case "Pending":
+      case 'pending':
         return STATUS_PENDING;
-      case "Rejected":
-        return STATUS_REJECTED;
-      case "Payment Processing":
-        return STATUS_IN_REVIEW;
-      case "Paid":
+      case 'approved':
         return STATUS_RESOLVED;
       default:
         return status;
@@ -45,7 +43,7 @@ const FetchPaymentData = () => {
     try {
       const statusQuery = filterValue ? `&filter=${filterValue}` : ''; // Add status filter if selected
       // const url = `${import.meta.env.VITE_SERVER_BASE_URL}/Support/issues?page=${pagination.pageIndex + 1}&search=${searchTerm}${statusQuery}`;
-      const url = `${import.meta.env.VITE_SERVER_BASE_URL}/Support/getAllPayment`;
+      const url = `${import.meta.env.VITE_SERVER_BASE_URL}/support/withdrawRequest`;
       const response = await fetch(url);
       const result = await response.json();
       console.log("result is ")
@@ -63,9 +61,7 @@ const FetchPaymentData = () => {
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-    
-        setLoading(false);
-   
+      setLoading(false);
     }
   };
 
@@ -95,13 +91,12 @@ const FetchPaymentData = () => {
 
           <div className='mt-2'>
             {/* Conditional rendering for loading state */}
-           
             {loading ? (
-               <CustomLoader />  // Show loading message when data is being fetched
+              <CustomLoader />  // Show loading message when data is being fetched
             ) : (
               <>
 
-                <TaskTablePayment
+                <TaskTableWithDraw
                   DATA={data[0]}
                   pageCount={data[1]}
                   totalUsers={data[2]}
@@ -122,4 +117,4 @@ const FetchPaymentData = () => {
   );
 };
 
-export default FetchPaymentData;
+export default FetchWithDraw;

@@ -31,6 +31,9 @@ const withdrawalRequestSchema = new mongoose.Schema({
   remarks: {
     type: String,
   },
+
+  verificationAttachment: { type : String },
+
 });
 
 export default mongoose.model('WithdrawalRequest', withdrawalRequestSchema);

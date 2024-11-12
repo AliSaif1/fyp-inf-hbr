@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TaskTable from './TaskTable';
 import Filters from './Filters';
-import Loader from '../Loaders';
+import Loader from '../Loaders/Loaders';
 import CustomLoader from '../Loaders/CustomLoader';
 
 // Status constants
@@ -44,16 +44,16 @@ const FetchData = () => {
       const result = await response.json();
       console.log("result is ")
       console.log(result)
-      
+
       // Map through the data and convert the status field
       const results = result?.data?.map((issue) => ({
         ...issue,
         status: mapStatus(issue.status),
       }));
 
-     
-      
-      setData([results,result.totalPages,result.totalUsers]);
+
+
+      setData([results, result.totalPages, result.totalUsers]);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -64,11 +64,11 @@ const FetchData = () => {
   // Use useEffect to re-fetch data when pagination, searchTerm, or filterValue changes
   useEffect(() => {
     fetchData();
-  }, [pagination.pageIndex, searchTerm, filterValue,Update]);
+  }, [pagination.pageIndex, searchTerm, filterValue, Update]);
 
   useEffect(() => {
     setPagination({ pageIndex: 0, pageSize: 6 }); // Reset to the first page
-  }, [searchTerm,filterValue,Update]);
+  }, [searchTerm, filterValue, Update]);
 
 
 
@@ -77,7 +77,7 @@ const FetchData = () => {
 
 
 
-  
+
   return (
     <>
       <div className='text-[9px] sm:text-[10px] mdm:text-[12px] flex justify-center flex-col items-center montserrat poppins-regular mt-5 mb-10 w-full'>
@@ -88,23 +88,23 @@ const FetchData = () => {
           <div className='mt-2'>
             {/* Conditional rendering for loading state */}
             {loading ? (
-              <CustomLoader/>  // Show loading message when data is being fetched
+              <CustomLoader />  // Show loading message when data is being fetched
             ) : (
               <>
-              
-              <TaskTable
-                DATA={data[0]}
-                pageCount={data[1]}
-                totalUsers={data[2]}
-                pagination={pagination}
-                setPagination={setPagination}
-                Update={Update}
-                setUpdate={setUpdate}
-              />
-                
-                
+
+                <TaskTable
+                  DATA={data[0]}
+                  pageCount={data[1]}
+                  totalUsers={data[2]}
+                  pagination={pagination}
+                  setPagination={setPagination}
+                  Update={Update}
+                  setUpdate={setUpdate}
+                />
+
+
               </>
-              
+
             )}
           </div>
         </div>

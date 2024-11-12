@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import './index.css';
 import axios from 'axios';
-import Loader from '../../Components/Loaders';
+import Loader from '../../Components/Loaders/Loaders';
 import PopOver from '../../Components/PopOver';
 
 const ForgetPassword = () => {
@@ -19,7 +19,7 @@ const ForgetPassword = () => {
   const handleResetPassword = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(`${url}/Newauth/users/reset`, { email:username });
+      const response = await axios.post(`${url}/Newauth/users/reset`, { email: username });
       setMsg(response.data.message || "Password reset email has been sent.");
       setError("");
       setShowPopOver(false); // Hide pop-over if successful
@@ -66,12 +66,12 @@ const ForgetPassword = () => {
                   <div className='mx-auto flex flex-col justify-center text-center'>
                     <p className='poppins-light'>Enter your email below and we will send you instructions to reset your password.</p>
                     <div className='mt-4'>
-                    <input 
-                    type="email"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username or Email"
-                    className='inputField rounded-md' id={`password`} />
+                      <input
+                        type="email"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Username or Email"
+                        className='inputField rounded-md' id={`password`} />
                     </div>
                     <div className='mt-4'>
                       <button onClick={handleResetPassword} className='Button poppins-regular rounded-md py-[5px] md:py-[6px] px-5 cursor-pointer' disabled={loading}>
