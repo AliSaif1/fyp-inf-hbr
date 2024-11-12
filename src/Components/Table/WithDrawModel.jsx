@@ -123,6 +123,18 @@ const WithDrawModel = ({ rowData, onClose, Update, setUpdate }) => {
 
                         </div>
 
+                        <div>
+                       <label className="poppins-semibold text-[14px]">Amount</label>
+                        <input
+                            readOnly
+                            type="text"
+                            className="border-[1px] rounded-lg px-3 py-2 w-full"
+                            value={rowData.amount}
+                            onChange={(e) => setAccountNumber(e.target.value)}
+                            placeholder="Enter account number"
+                        />
+                       </div>
+
                         {/* Status Selection */}
                         <div className="flex w-full mt-5 justify-between items-center text-[14px] poppins-regular">
                             <div>

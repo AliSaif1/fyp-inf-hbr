@@ -22,7 +22,7 @@ const UserIssue = ({ onCloseIssue }) => {
     useEffect(() => {
         if (SubmittedIssue) {
             // You can re-fetch data or perform any action after a successful submission
-            alert("I am here")
+            alert("Submitted Successfully")
             setSubmittedIssue(!SubmittedIssue); // Reset the SubmittedIssue state
         }
     }, [SubmittedIssue]);
@@ -97,6 +97,11 @@ const CreateIssue = ({ onClose, setSubmittedIssue, SubmittedIssue }) => {
         const formData = new FormData();
         const userId = Cookies.get('userId');
 
+        console.log("user id is ")
+        console.log(userId)
+        console.log(issueType)
+        console.log(description)
+
         formData.append('userId', userId);
         formData.append('issue', issueType);
         formData.append('description', description);
@@ -114,6 +119,7 @@ const CreateIssue = ({ onClose, setSubmittedIssue, SubmittedIssue }) => {
             });
 
             if (response.ok) {
+                console.log("Reponse is "+response)
                 setSubmittedIssue(!SubmittedIssue);
                 onClose();
             } else {

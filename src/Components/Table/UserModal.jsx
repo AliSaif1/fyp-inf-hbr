@@ -21,9 +21,17 @@ const UserModal = ({ rowData, onClose }) => {
   const urlServer = `${import.meta.env.VITE_SERVER_BASE_URL}`;
   // Function to toggle attachment modal
   const handleOpenAttachment = () => {
-    window.open(urlServer+rowData.attachment, "_blank");
-  };
-
+    const newWindow = window.open();
+    newWindow.document.write(`
+        <html>
+            <head><title>Transaction</title></head>
+            <body style="margin:0;">
+                <img src="${rowData.attachment}" style="width:100%;height:auto;" />
+            </body>
+        </html>
+    `);
+    newWindow.document.close();
+};
 
   return (
 

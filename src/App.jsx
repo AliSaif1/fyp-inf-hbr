@@ -63,6 +63,9 @@ const App = () => {
 
 
           </Routes>
+
+
+
 {/* <Routes>
   <Route path='/*' element={<CustomerRoutes/>}/>
 </Routes> */}

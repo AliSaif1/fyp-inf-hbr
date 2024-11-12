@@ -4,6 +4,7 @@ import Filters from './Filters';
 import Loader from '../Loaders/Loaders';
 import CustomLoader from '../Loaders/CustomLoader';
 import TaskTableUser from './TaskTableUser';
+import Cookies from 'js-cookie';
 
 // Status constants
 const STATUS_PENDING = { id: 1, name: "Pending" };
@@ -38,7 +39,10 @@ const FetchDataUser = () => {
   console.log(data)
   // Fetch data function
   const fetchData = async () => {
-    const userId = '67291b58692bcdb0ac1082cb'
+    const userId = Cookies.get('userId');
+
+    console.log("user id is ")
+    console.log(userId)
     setLoading(true); // Set loading state to true when fetching starts
     const url = `${import.meta.env.VITE_SERVER_BASE_URL}`;
     try {

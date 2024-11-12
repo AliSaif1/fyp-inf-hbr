@@ -5,20 +5,16 @@ import { Issue } from '../../models/Support/Issues.js';
 import { authMiddleware } from '../../middleware/authMiddleware.js';
 import IssueStatistics from '../../models/Support/OverView.js';
 
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../config/firebase.js';
 const router = express.Router();
 
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/Issues'); // Store files in the 'uploads/Issues' folder
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Ensure unique filenames
-    },
-});
+const upload = multer({ storage: multer.memoryStorage() });
 
-const upload = multer({ storage });
+
+
+
 
 router.get('/',(req,res) => { 
     res.status(200).json({ message: 'ok to create issue' });
@@ -27,7 +23,14 @@ router.get('/',(req,res) => {
 
 // Route to handle creating a new issue
 router.post('/new', upload.single('attachment'), async (req, res) => {
-    console.log("Creating a new issue");
+   
+    const logo = req.file;
+   
+    const logoRef = ref(storage, `Issues/${Date.now()}_${logo.originalname}`);
+    await uploadBytes(logoRef, logo.buffer);
+    const logoURL = await getDownloadURL(logoRef);
+    console.log("Logo url is ")
+    console.log(logoURL)
 
     try {
         const { issue, description, contractLink, userId } = req.body;
@@ -38,7 +41,7 @@ router.post('/new', upload.single('attachment'), async (req, res) => {
             issue,
             description,
             status: 'Pending', // Set default status
-            attachment: req.file ? `/uploads/Issues/${req.file.filename}` : null,
+            attachment: req.file ? logoURL : null,
             contractLink,
         });
 
