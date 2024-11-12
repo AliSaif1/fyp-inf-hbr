@@ -12,43 +12,43 @@ const Search = () => {
   const [selectedAccount, setSelectedAccount] = useState('');
   const [accountID, setAccountID] = useState("");
 
+  const fetchData = async () => {
+    const authToken = localStorage.getItem('authToken');
+
+    try {
+      // Fetch payment accounts
+      const accountsResponse = await fetch('/api/getPaymentAccounts', {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      });
+      console.log("Accounts: ", accountsResponse.accounts);
+      if (accountsResponse.ok) {
+        const accountsData = await accountsResponse.json();
+        console.log("Accounts: ", accountsData.accounts);
+        setAccountID(accountsData.accounts._id);
+        setAccounts(accountsData.accounts);
+      } else {
+        setMessage('Failed to fetch payment accounts. Please try again.');
+      }
+
+      // Fetch earnings
+      const earningsResponse = await fetch('/api/getEarnings', {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${authToken}` },
+      });
+      if (earningsResponse.ok) {
+        const earningsData = await earningsResponse.json();
+        setEarnings(earningsData.earnings || 0);
+      } else {
+        setMessage('Failed to fetch earnings.');
+      }
+    } catch (error) {
+      setMessage('An error occurred while fetching data.');
+    }
+  };
+
   // Fetch payment accounts and earnings on component mount
   useEffect(() => {
-    const fetchData = async () => {
-      const authToken = localStorage.getItem('authToken');
-
-      try {
-        // Fetch payment accounts
-        const accountsResponse = await fetch('/api/getPaymentAccounts', {
-          method: 'GET',
-          headers: { 'Authorization': `Bearer ${authToken}` },
-        });
-        console.log("Accounts: ", accountsResponse.accounts);
-        if (accountsResponse.ok) {
-          const accountsData = await accountsResponse.json();
-          console.log("Accounts: ", accountsData.accounts);
-          setAccountID(accountsData.accounts._id);
-          setAccounts(accountsData.accounts);
-        } else {
-          setMessage('Failed to fetch payment accounts. Please try again.');
-        }
-
-        // Fetch earnings
-        const earningsResponse = await fetch('/api/getEarnings', {
-          method: 'GET',
-          headers: { 'Authorization': `Bearer ${authToken}` },
-        });
-        if (earningsResponse.ok) {
-          const earningsData = await earningsResponse.json();
-          setEarnings(earningsData.earnings || 0);
-        } else {
-          setMessage('Failed to fetch earnings.');
-        }
-      } catch (error) {
-        setMessage('An error occurred while fetching data.');
-      }
-    };
-
     fetchData();
   }, []);
 
@@ -177,6 +177,7 @@ const Search = () => {
         // Handle the successful response
         setMessage(`Withdrawal request of $${withdrawalAmount} submitted successfully to ${selectedAccount}.`);
         setWithdrawalAmount(''); // Clear the input field
+        fetchData();
       })
       .catch(error => {
         // Handle any errors
