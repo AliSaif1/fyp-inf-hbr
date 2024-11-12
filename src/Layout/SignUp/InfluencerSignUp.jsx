@@ -8,6 +8,7 @@ import Cookies from 'js-cookie';
 import axios from "axios";
 import { useState, useEffect, useRef } from 'react';
 import ScreenSizeDisplay from '../../useCurrentScreenSize';
+import Loader from '../../Components/Loaders/Loaders';
 
 const InfluencerSignUp = () => {
   const [stepperIndex, setStepperIndex] = useState(0);
@@ -91,7 +92,6 @@ const InfluencerSignUp = () => {
 }
 
 
-
 const BasicDetails = ({ nextStep, onChange }) => {
   const [data, setData] = useState({
     fullName: '',
@@ -135,12 +135,17 @@ const BasicDetails = ({ nextStep, onChange }) => {
   };
 
   const handleNext = async () => {
+    // Check for all required fields
     if (!data.fullName) {
       setError('Please enter your full name.');
     } else if (!data.userName) {
       setError('Please enter your user name.');
     } else if (!data.age) {
       setError('Please enter your age.');
+    } else if (data.age < 18) {
+      setError('Age must be 18 or older.');
+    } else if (data.age <= 0) {
+      setError('Age cannot be a negative value or zero.');
     } else if (!data.category) {
       setError('Please select a category.');
     } else if (!data.photo) {
@@ -149,22 +154,23 @@ const BasicDetails = ({ nextStep, onChange }) => {
       setError('');
       setLoading(true); // Set loading to true
 
-      // try {
-      //   const response = await axios.post(`${url}/api/users/Influnencer/CompleteProfile/check-InfluencerName`, { userName: data.userName });
+      try {
+        // Check if the userName already exists in the system
+        const response = await axios.post(`${url}/SignUpCheck/check-InfluencerUserName`, { userName: data.userName });
 
-      //   if (response.data.exists) {
-      //     setError('This brand name is already taken. Please choose a different name.');
-      //   } else {
+        if (response.data.exists) {
+          setError('This user name is already taken. Please choose a different name.');
+        } else {
           setError('');
-          onChange(data);
-          nextStep();
-        // }
-      // } catch (error) {
-      //   console.error('Error checking brand name:', error);
-      //   setError('An error occurred while checking the brand name. Please try again.');
-      // } finally {
-      //   setLoading(false); // Set loading to false
-      // }
+          onChange(data); // Pass the data to the parent component
+          nextStep(); // Proceed to the next step
+        }
+      } catch (error) {
+        console.error('Error checking user name:', error);
+        setError('An error occurred while checking the user name. Please try again.');
+      } finally {
+        setLoading(false); // Set loading to false after the request is done
+      }
     }
   };
 
@@ -173,9 +179,7 @@ const BasicDetails = ({ nextStep, onChange }) => {
       <img className="hidden lg:flex w-96 absolute bottom-2 -left-0 h-[300px] z-20" src="/Svg/SignUp4.svg" alt="" />
       <div className="sm:items-start flex flex-col items-center justify-center">
         {loading && (
-          <div className="flex items-center justify-center h-32">
-            <div className="w-16 h-16 border-4 border-t-orange-500 border-solid rounded-full animate-spin"></div>
-          </div>
+          <Loader/>
         )}
         <div className="flex flex-col-reverse sm:items-center sm:flex-row justify-between">
           <div>

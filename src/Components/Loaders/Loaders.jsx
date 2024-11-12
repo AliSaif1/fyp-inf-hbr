@@ -6,7 +6,7 @@ const Loader = () => {
     <>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
      <div className="loader-container">
-      <span className="loader"></span>
+      <span className="loader2"></span>
     </div>
     </div>
     </>

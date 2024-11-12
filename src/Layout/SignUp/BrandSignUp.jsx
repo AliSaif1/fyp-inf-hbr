@@ -262,29 +262,41 @@ const CompanyDetails = ({ nextStep, onChange }) => {
 
   const handleNext = async () => {
 
+    const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
 
+
+    // if (data.brandName && data.websiteLink && data.category && data.photo && data.brandUserName) {
+    //   if (!urlPattern.test(data.websiteLink)) {
+    //     setError('Please enter a valid website link (e.g., https://example.com).');
+    //     return;
+    //   }
     // Check if all the values are added (no value is null or empty) and image is uploaded /api/users/brand/check-brand
     if (data.brandName && data.websiteLink && data.category && data.photo && data.brandUserName) {
+     
+          if (!urlPattern.test(data.websiteLink)) {
+        setError('Please enter a valid website link (e.g., https://example.com).');
+        return;
+          }
       try {
         // Make an Axios request to check if the brand name exists
-        // const response = await axios.post(`${url}/api/users/Brand/CompleteProfile/check-brandName`, { brandName: data.brandName });
-        // const response2 = await axios.post(`${url}/api/users/Brand/CompleteProfile/check-brandUsername`, { brandUserName: data.brandUserName });
+        const response = await axios.post(`${url}/SignUpCheck/check-brandName`, { brandName: data.brandName });
+        const response2 = await axios.post(`${url}/SignUpCheck/check-brandUsername`, { brandUserName: data.brandUserName });
 
-        // // Assume the backend returns { exists: true } if the brand exists
-        // console.log(response.data);
-        // if (response.data.exists) {
-        //   setError('This brand name is already taken. Please choose a different name.');
-        // } else if( response2.data.exists){
-        //   setError('This user name is already taken. Please choose a different name.');
+        // Assume the backend returns { exists: true } if the brand exists
+        console.log(response.data);
+        if (response.data.exists) {
+          setError('This brand name is already taken. Please choose a different name.');
+        } else if( response2.data.exists){
+          setError('This user name is already taken. Please choose a different name.');
 
-        // }
+        }
         
-        // else  {
+        else  {
           // If the brand name is not taken, proceed with the next step
-          // setError(''); // Clear error if everything is valid
+          setError(''); // Clear error if everything is valid
           onChange(data);
           nextStep(); // Proceed to the next step
-        // }
+        }
       } catch (error) {
         console.error('Error checking brand name:', error);
         setError('An error occurred while checking the brand name. Please try again.');
@@ -376,6 +388,7 @@ const TermsAndConditions = ({ nextStep, data }) => {
       const formData = new FormData();
 
    formData.append('userId',userId)
+   formData.append('userName',data.brandUserName   )
    formData.append('position',data.basicDetails.position   )
    formData.append('companySize',data.basicDetails.companySize)
    formData.append('influencersWorkedWith',data.basicDetails.influencerSize)

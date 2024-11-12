@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import Brand from '../models/brands.js'; // Assuming you have a Brand model
 
 export const saveInfluencerIn = async (req, res) => {
-  const { userId, position, companySize, influencersWorkedWith, brandName, website, category } = req.body;
+  const { userId,userName, position, companySize, influencersWorkedWith, brandName, website, category } = req.body;
   const logo = req.file;
 
   if (!logo) {
@@ -44,7 +44,8 @@ export const saveInfluencerIn = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
-        position,            // Optional position field
+        position,       
+        userName,     // Optional position field
         companySize,         // Company size
         influencersWorkedWith, // Number of influencers worked with
         fullName: brandName,           // Brand's name

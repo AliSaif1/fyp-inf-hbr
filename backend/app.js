@@ -30,6 +30,7 @@ import NewAuthRoutes from './routes/NewAuth/auth.js';
 
 import CustomerService from './routes/Support/Support.js';
 import Issues from './routes/Support/Issues.js';
+import SignUpCheck from './API/SignUpCheck/SignUp.js'
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -71,6 +72,7 @@ app.use('/api/messages', chatRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/Support',CustomerService)
 app.use("/api/issues",Issues );
+app.use("/SignUpCheck", SignUpCheck);
 
 const checkFirebaseConnection = async () => {
   try {

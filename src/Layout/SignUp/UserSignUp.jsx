@@ -93,11 +93,10 @@ const BasicDetails = ({ nextStep, onChange }) => {
     userName: '',
     gender: 'Male',
     age: '',
-  
-    photo: null,  // Store the file itself, not just the URL
+    photo: null, // Store the file itself, not just the URL
   });
-  const url = `${import.meta.env.VITE_SERVER_BASE_URL}`;
   const [error, setError] = useState(''); // State for managing error messages
+  const url = `${import.meta.env.VITE_SERVER_BASE_URL}`;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -129,40 +128,40 @@ const BasicDetails = ({ nextStep, onChange }) => {
   };
 
   const handleNext = async () => {
-    // Check for individual field errors
+    // Validate each field
     if (!data.fullName) {
       setError('Please enter your full name.');
     } else if (!data.userName) {
       setError('Please enter your user name.');
-    } else if (!data.age) {
-      setError('Please enter your age.');
+    } else if (!data.age || data.age < 18) {
+      setError('Please enter a valid age (18 or older).');
     } else if (!data.photo) {
       setError('Please upload an image.');
     } else {
       setError(''); // Clear error if everything is filled
-  
-      // try {
-      //   // Make an Axios request to check if the brand name exists
-      //   const response = await axios.post(`${url}/api/users/Auidence/CompleteProfile/check-AuidenceName`, { userName: data.userName });
-  
-      //   console.log("in Company details  response is ");
-      //   console.log(response.data.exists);
-  
-      //   if (response.data.exists) {
-      //     setError('This User name is already taken. Please choose a different name.');
-      //   } else {
-          // If the brand name is not taken, proceed with the next step
+
+      try {
+        // Make an Axios request to check if the username exists
+        const response = await axios.post(`${url}/SignUpCheck/check-UserName`, { userName: data.userName });
+
+        console.log("in Company details  response is ");
+        console.log(response.data.exists);
+
+        if (response.data.exists) {
+          setError('This User name is already taken. Please choose a different name.');
+        } else {
+          // If the username is not taken, proceed to the next step
           setError(''); // Clear error if everything is valid
           onChange(data);
           nextStep(); // Proceed to the next step
-        // }
-      // } catch (error) {
-      //   console.error('Error checking brand name:', error);
-      //   setError('An error occurred while checking the User name. Please try again.');
-      // }
+        }
+      } catch (error) {
+        console.error('Error checking username:', error);
+        setError('An error occurred while checking the User name. Please try again.');
+      }
     }
   };
-  
+
   return (
     <>
       <img className="hidden lg:flex w-96 absolute bottom-2 -left-0 h-[300px] z-20" src="/Svg/SignUp4.svg" alt="" />
@@ -215,8 +214,6 @@ const BasicDetails = ({ nextStep, onChange }) => {
             />
           </div>
         </div>
-
-        
 
         <div
           onClick={handleNext}
