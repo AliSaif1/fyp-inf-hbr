@@ -20,29 +20,22 @@ const Message = () => {
   const [loggedInUserId, setLoggedInUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedUserImage, setSelectedUserImage] = useState("");
-  // const [lastMessages, setLastMessages] = useState({});
   const [latestMessages, setLatestMessages] = useState({});
   const [noMessagesFound, setNoMessagesFound] = useState(false);
-  // const location = useLocation(); // Retrieve location state
-
   const [showGroupOptions, setShowGroupOptions] = useState(false);
   const [userStatus, setUserStatus] = useState({});
   const [selectedGroup, setSelectedGroup] = useState(null); // Active group ID
   const [groupTitle, setGroupTitle] = useState(""); // Active group title
-  // eslint-disable-next-line no-unused-vars
   const [selectedGroupMembers, setSelectedGroupMembers] = useState([]);
   const [admin, setAdmin] = useState({}); // Active group members
   const [selectedGroupImage, setSelectedGroupImage] = useState(""); // Active group image
   const [groups, setGroups] = useState([]);
-  // const newGroupId = location.state?.newGroupId;
   const [contacts, setContacts] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
-  // const [recentChats, setRecentChats] = useState([]);
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
   const [selectedUserName, setSelectedUserName] = useState(""); // New state to hold the selected user's name
   const [selectedChatId, setSelectedChatId] = useState(null); // Store the selected chat's ID
-  // const [conversations, setConversations] = useState({}); // Stores conversations by sender ID
 
   // Function to generate chatId based on the sender and receiver IDs
   const generateChatId = (senderId, receiverId) => {
@@ -121,8 +114,9 @@ const Message = () => {
         const existingContactIndex = prevContacts.findIndex(
           (contact) => contact.id === data.sender
         );
-
+       
         if (existingContactIndex === -1) {
+          fetchContacts();
           // New contact received, add to the list
           const contactData = {
             id: data.sender,
@@ -225,52 +219,32 @@ const Message = () => {
     fetchLoggedInUser();
   }, []);
 
-  // useEffect(() => {
-  //   if (loggedInUserId) {
-  //     const fetchContacts = async () => {
-  //       try {
-  //         const response = await axios.get(
-  //           `/api/messages/messages/contacts/${loggedInUserId}`
-  //         );
-  //         setContacts(response.data);
-  //       } catch (error) {
-  //         console.error("Error fetching contacts:", error);
-  //       }
-  //     };
-  //     fetchContacts();
-  //   }
-  // }, [loggedInUserId]);
-
-  // useEffect(() => {
-  //   const fetchContacts = async () => {
-  //     // Existing code to fetch contacts or groups
-  //   };
-
-  //   fetchContacts();
-  // }, []);
-
   // 1. Fetch contacts on page load or if logged-in user ID changes
   useEffect(() => {
     if (loggedInUserId) {
-      const fetchContacts = async () => {
-        try {
-          const response = await axios.get(
-            `/api/messages/messages/contacts/${loggedInUserId}`
-          );
-          setContacts(response.data);
-
-          // Automatically select the first contact or continue with last selected contact
-          if (response.data.length > 0) {
-            const initialChatId = selectedChatId || response.data[0].id; // Use last selected or first contact
-            setSelectedChatId(initialChatId);
-          }
-        } catch (error) {
-          console.error("Error fetching contacts:", error);
-        }
-      };
+    
       fetchContacts();
     }
   }, [loggedInUserId]);
+
+
+  const fetchContacts = async () => {
+    try {
+      const response = await axios.get(
+        `/api/messages/messages/contacts/${loggedInUserId}`
+      );
+      setContacts(response.data);
+
+      // Automatically select the first contact or continue with last selected contact
+      if (response.data.length > 0) {
+        const initialChatId = selectedChatId || response.data[0].id; // Use last selected or first contact
+        setSelectedChatId(initialChatId);
+      }
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+    }
+  };
+
 
   // 2. Fetch messages for the selected chat when contacts load or selected chat changes
   useEffect(() => {
@@ -723,7 +697,6 @@ const Message = () => {
               <p>No members found</p>
             )}
           </div>
-          
           {showGroupOptions && selectedGroup && (
             <div className="popup-overlay">
               <div className="popup-content">

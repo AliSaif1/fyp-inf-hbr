@@ -30,7 +30,6 @@ export const getMessagesByMember = async (req, res) => {
     return res.status(500).json({ message: "Error fetching messages", error });
   }
 };
-
 export const getContacts = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -39,28 +38,56 @@ export const getContacts = async (req, res) => {
       return res.status(400).json({ message: "UserId is required" });
     }
 
-    // Find all distinct chat partners (receivers) where the user is the sender
-    const messages = await Message.find({ sender: userId }).populate(
+    // Find all messages where the user is the sender
+    const sentMessages = await Message.find({ sender: userId }).populate(
       "receiver",
       "fullName userName userType photo email"
-    );
+    ) || [];
 
-    // Example in getContacts
+    // Find all messages where the user is the receiver
+    const receivedMessages = await Message.find({ receiver: userId }).populate(
+      "sender",
+      "fullName userName userType photo email"
+    ) || [];
+
+    // Create a Map to store unique contacts
     const contacts = new Map();
-    messages.forEach((msg) => {
-      const { chatId, receiver } = msg;
-      if (receiver) {
-        contacts.set(receiver._id.toString(), {
-          id: receiver._id, // or use receiver.id if applicable
-          fullName: receiver.fullName,
-          userName: receiver.userName,
-          userType: receiver.userType,
-          photo: receiver.photo,
-          email: receiver.email,
-          chatId,
-        });
-      }
-    });
+
+    // Add each receiver (from sent messages) to contacts if sentMessages exists and has content
+    if (sentMessages.length > 0) {
+      sentMessages.forEach((msg) => {
+        const { chatId, receiver } = msg;
+        if (receiver) {
+          contacts.set(receiver._id.toString(), {
+            id: receiver._id,
+            fullName: receiver.fullName,
+            userName: receiver.userName,
+            userType: receiver.userType,
+            photo: receiver.photo,
+            email: receiver.email,
+            chatId,
+          });
+        }
+      });
+    }
+
+    // Add each sender (from received messages) to contacts if receivedMessages exists and has content
+    if (receivedMessages.length > 0) {
+      receivedMessages.forEach((msg) => {
+        const { chatId, sender } = msg;
+        if (sender) {
+          contacts.set(sender._id.toString(), {
+            id: sender._id,
+            fullName: sender.fullName,
+            userName: sender.userName,
+            userType: sender.userType,
+            photo: sender.photo,
+            email: sender.email,
+            chatId,
+          });
+        }
+      });
+    }
 
     // Convert map values to an array and send as a response
     return res.status(200).json([...contacts.values()]);
