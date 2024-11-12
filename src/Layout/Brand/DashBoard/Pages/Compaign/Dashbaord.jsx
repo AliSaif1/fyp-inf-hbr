@@ -349,6 +349,7 @@ const InfluencerList = ({ ImageSrc, Name, age, ColorBorder, Status, TextColor, b
   
       if (response.status === 200) {
         setSuccessMessage('Post approved successfully.');
+        navigate('/Compaign');
         // Optionally refresh posts or update state
       }
     } catch (error) {
@@ -373,6 +374,7 @@ const InfluencerList = ({ ImageSrc, Name, age, ColorBorder, Status, TextColor, b
       if (response.status === 200) {
         setInstruction(''); // Clear the input after successful submission
         setSelectedPostId(null); // Reset selected post ID
+        navigate('/Compaign');
       }
     } catch (error) {
       if (error.response && error.response.data.message) {

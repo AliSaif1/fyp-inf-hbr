@@ -23,6 +23,7 @@ const Search = () => {
           method: 'GET',
           headers: { 'Authorization': `Bearer ${authToken}` },
         });
+        console.log("Accounts: ", accountsResponse.accounts);
         if (accountsResponse.ok) {
           const accountsData = await accountsResponse.json();
           console.log("Accounts: ", accountsData.accounts);
@@ -114,7 +115,7 @@ const Search = () => {
             setPaymentAccount('');
             setAccountHolderName('');
             setBankName('');
-            setAccountID(result.newPaymentAccount._id);
+            setAccountID(result.newPaymentAccount[0]._id);
         } else {
             const errorData = await response.json();
             setMessage(errorData.message || 'Failed to add payment account. Please try again.');
@@ -123,7 +124,12 @@ const Search = () => {
         console.error(error);
         setMessage('An error occurred while adding the payment account.');
     }
-};
+  };
+
+  useEffect(() => {
+    const selected = accounts.find(acc => acc.paymentAccount === selectedAccount);
+    if (selected) setAccountID(selected._id);
+  }, [selectedAccount, accounts]);  
 
   const handleRequestWithdrawal = () => {
     if (withdrawalAmount && selectedAccount) {
@@ -138,6 +144,11 @@ const Search = () => {
       // Check if the withdrawal amount is greater than available earnings
       if (amount > earnings) {
         setMessage("Withdrawal amount can't be greater than available earnings.");
+        return;
+      }
+
+      if(!accountID){
+        alert("There is no account ID found");
         return;
       }
   
