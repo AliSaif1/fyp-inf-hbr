@@ -141,7 +141,7 @@ const BlogPost = ({ ID, Title, Body, Time, Image, Likes, commentsCount, IsLiked 
         return; // Exit early if date extraction fails
       }
   
-      const [month, day, year] = datePart.split('/'); // Extract month, day, year
+      const [day, month, year] = datePart.split('/'); // Extract month, day, year
   
       // Check if the extracted values are valid
       if (!month || !day || !year) {

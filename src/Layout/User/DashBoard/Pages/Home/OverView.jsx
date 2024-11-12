@@ -194,7 +194,7 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
         return; // Exit early if date extraction fails
       }
   
-      const [month, day, year] = datePart.split('/'); // Extract month, day, year
+      const [day, month, year] = datePart.split('/'); // Extract month, day, year
   
       // Check if the extracted values are valid
       if (!month || !day || !year) {
@@ -259,7 +259,7 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
         return; // Exit early if date extraction fails
       }
   
-      const [month, day, year] = datePart.split('/'); // Extract month, day, year
+      const [day, month, year] = datePart.split('/'); // Extract month, day, year
   
       // Check if the extracted values are valid
       if (!month || !day || !year) {
