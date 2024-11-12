@@ -296,31 +296,35 @@ const Message = () => {
       setNoMessagesFound(true);
     }
   };
-
   useEffect(() => {
     // Skip fetching if user ID is not available
     if (!loggedInUserId) return;
-
+  
     const fetchGroups = async () => {
       setIsLoading(true); // Start loading before API call
       try {
         const response = await axios.get(`/api/groups/${loggedInUserId}`);
-        setGroups(response.data.groups || []); // `response.data.groups` should contain the groups array
-        console.log(
-          "Grouips -------------------Testing-----------",
-          response.data.groups
-        );
+        
+        // Check if the response contains groups data
+        const groupsWithAdminFlag = (response.data.groups || []).map(group => ({
+          ...group,
+          isAdmin: group.admin._id === loggedInUserId, // Add isAdmin field
+        }));
+  
+        setGroups(groupsWithAdminFlag); // Set the updated groups data
+        
+        console.log("Groups with isAdmin flag:", groupsWithAdminFlag);
       } catch (error) {
         console.error("Error fetching groups:", error);
       } finally {
         setIsLoading(false); // Stop loading after API call
       }
     };
-
+  
     // Fetch groups only if loggedInUserId has changed
     fetchGroups();
   }, [loggedInUserId]);
-
+  
   const modifyGroup = async (groupId) => {
     try {
       const updatedGroup = {
@@ -339,10 +343,12 @@ const Message = () => {
   };
 
   const deleteGroup = async (groupId) => {
+
     // Remove the group from the state
     setGroups((prevGroups) =>
       prevGroups.filter((group) => group._id !== groupId)
     );
+    setShowMessage(false);
   };
   const handleSelectGroup = (group) => {
     const groupId = group._id;
@@ -444,56 +450,36 @@ const Message = () => {
       console.warn("Cannot send an empty message");
     }
   };
+// Debounced search function to filter contacts
+const handleSearch = debounce(() => {
+  // If search query is empty, reset contacts to their original state
+  if (!searchQuery.trim()) {
+    setSearchResults([]);  // Clear search results
+    setErrorMessage("");    // Clear any error messages
+    return;
+  }
 
-  // Debounced search function
-  const handleSearch = debounce(async () => {
-    if (!searchQuery.trim()) {
-      if (searchResults.length > 0) {
-        setSearchResults([]); // Clear results if query is empty and results exist
-      }
-      setErrorMessage("");
-      return;
-    }
+  setIsSearching(true);
 
-    setIsSearching(true);
-    setIsLoading(true);
-    setSearchResults([]); // Clear previous results on new search
-    setErrorMessage("");
+  // Filter contacts based on searchQuery
+  const filteredResults = contacts.filter((contact) =>
+    contact.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-    try {
-      const response = await axios.get(`/api/users/search`, {
-        params: { query: searchQuery },
-        cancelToken: new axios.CancelToken((c) => (window.cancelRequest = c)),
-      });
+  // Update searchResults or display "no results" message
+  if (filteredResults.length === 0) {
+    setErrorMessage("No contacts found");
+  } else {
+    setSearchResults(filteredResults);  // Update searchResults with filtered results
+  }
 
-      // Filter out users already in contacts from the search results
-      const filteredResults = response.data.filter(
-        (user) => !contacts.some((contact) => contact.id === user._id)
-      );
+  setIsSearching(false);
+}, 500); // Adjust debounce delay as needed
 
-      if (filteredResults.length === 0) {
-        setErrorMessage("No new users found");
-      } else {
-        setSearchResults(filteredResults);
-      }
-    } catch (error) {
-      console.error("Error searching for users:", error);
-      setErrorMessage("Error fetching search results.");
-    } finally {
-      setIsSearching(false);
-      setIsLoading(false);
-    }
-  }, 500); // Debounce delay in milliseconds (500 ms)
-
-  // Trigger handleSearch whenever searchQuery changes
-  useEffect(() => {
-    handleSearch();
-
-    // Cancel the previous request if the searchQuery changes before completion
-    return () => {
-      if (window.cancelRequest) window.cancelRequest();
-    };
-  }, [searchQuery]); // Only re-run if searchQuery changes
+// Trigger handleSearch whenever searchQuery changes
+useEffect(() => {
+  handleSearch();
+}, [searchQuery]); // Re-run only if searchQuery changes  
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -618,119 +604,128 @@ const Message = () => {
     <div className="bg-white h-screen text-[9px] xs:text-[10px] sm:text-[13px] md:text-[14px]">
       <div className="sm:grid sm:grid-cols-12 mdm:w-[800px] lg:w-[1000px] mx-auto">
         {/* Left Side - Search Users */}
-        <div className="col-span-4 border-r-[1px] pr-2 h-screen ml-2">
-          {/* Search Bar Section */}
-          <div className="flex justify-center mt-5 sm:justify-between items-center">
-            <div>
-              <div className="flex items-center w-[250px] sm:w-[180px] mdm:w-[200px] lg:w-[250px] relative">
-                <img
-                  className="size-[20px] absolute top-3 left-2 cursor-pointer"
-                  src="/Svg/SearchIcon.svg"
-                  alt="Search"
-                  onClick={handleSearch}
-                />
-                <input
-                  className="outline-0 bg-none w-full h-[40px] bg-black/5 rounded-lg pl-9"
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search"
+<div className="col-span-4 border-r-[1px] pr-2 h-screen ml-2">
+  {/* Search Bar Section */}
+  <div className="flex justify-center mt-5 sm:justify-between items-center">
+    <div>
+      <div className="flex items-center w-[250px] sm:w-[180px] mdm:w-[200px] lg:w-[250px] relative">
+        <img
+          className="size-[20px] absolute top-3 left-2 cursor-pointer"
+          src="/Svg/SearchIcon.svg"
+          alt="Search"
+          onClick={handleSearch}
+        />
+        <input
+          className="outline-0 bg-none w-full h-[40px] bg-black/5 rounded-lg pl-9"
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search"
+        />
+      </div>
+      {/* Error and Loading Display */}
+      {errorMessage && (
+        <p className="text-center text-red-500 mt-4">{errorMessage}</p>
+      )}
+      {isLoading && <LoadingSpinner />}
+    </div>
+    {/* Create Group Button */}
+    <Link to="/create-group">
+      <div className="OrangeButtonWithText-v3 fixed bottom-1 right-1 sm:relative flex items-center cursor-pointer justify-center">
+        <p className="text-2xl">+</p>
+      </div>
+    </Link>
+  </div>
+
+  {/* Search Results and Chats Section */}
+  {isSearching ? (
+    <div className="flex justify-center items-center mt-5">
+      <div className="loader"></div>
+    </div>
+  ) : (
+    <div>
+      {/* Display filtered results or contacts in Chats */}
+      <div className="ml-10 mr-2 mt-5 relative right-8">
+        <p className="poppins-semibold text-[15px]">Chats</p>
+
+        {searchQuery.trim() ? (
+          searchResults.length > 0 ? (
+            searchResults.map((user) => (
+              <div
+                key={user._id}
+                onClick={() => handleSelectMember(user)}
+                className="cursor-pointer"
+              >
+                <InfluncerMessage
+                  Image={user.photo}
+                  Name={user.fullName}
+                  Time={userStatus[user._id] ? "Online" : "Offline"}
                 />
               </div>
-              {/* Error and Loading Display */}
-              {errorMessage && (
-                <p className="text-center text-red-500 mt-4">{errorMessage}</p>
-              )}
-              {isLoading && <LoadingSpinner />}
-            </div>
-            {/* Create Group Button */}
-            <Link to="/create-group">
-              <div className="OrangeButtonWithText-v3 fixed bottom-1 right-1 sm:relative flex items-center cursor-pointer justify-center">
-                <p className="text-2xl">+</p>
-              </div>
-            </Link>
-          </div>
-          {/* Search Results Section */}
-          {isSearching ? (
-            <div className="flex justify-center items-center mt-5">
-              <div className="loader"></div>
-            </div>
+            ))
           ) : (
-            <div>
-              {searchResults.length > 0 ? (
-                searchResults.map((user) => (
-                  <div
-                    key={user._id}
-                    onClick={() => handleSelectMember(user)}
-                    className="cursor-pointer"
-                  >
-                    <InfluncerMessage
-                      Image={user.photo}
-                      Name={user.fullName}
-                      Time={userStatus[user._id] ? "Online" : "Offline"}
-                    />
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500"></p>
-              )}
-            </div>
-          )}
-          <div className="ml-10 mr-2 mt-5 relative right-8">
-            <p className="poppins-semibold text-[15px]">Chats</p>
-            {contacts && contacts.length > 0 ? (
-              contacts.map((contact, index) => (
-                <div
-                  key={contact._id || index} // Fallback to index if _id is missing
-                  onClick={() => handleSelectMember(contact)}
-                  className="cursor-pointer"
-                >
-                  <InfluncerMessage
-                    Image={contact.photo || "default-photo-url"} // Default image if missing
-                    Name={contact.fullName || "Unknown"}
-                    Time={userStatus[contact._id] ? "Online" : "Offline"}
-                    Message={latestMessages[contact.id]?.text}
-                  />
-                </div>
-              ))
-            ) : (
-              <p>No members found</p>
-            )}
-          </div>
-          {showGroupOptions && selectedGroup && (
-            <div className="popup-overlay">
-              <div className="popup-content">
-                <p>Edit Group</p>
-                <p>Delete Group</p>
-                <p onClick={() => setShowGroupOptions(false)}>Close</p>
+            <p className="text-gray-500">No contacts found</p>
+          )
+        ) : (
+          contacts && contacts.length > 0 ? (
+            contacts.map((contact, index) => (
+              <div
+                key={contact._id || index} // Fallback to index if _id is missing
+                onClick={() => handleSelectMember(contact)}
+                className="cursor-pointer"
+              >
+                <InfluncerMessage
+                  Image={contact.photo || "default-photo-url"} // Default image if missing
+                  Name={contact.fullName || "Unknown"}
+                  Time={userStatus[contact._id] ? "Online" : "Offline"}
+                  Message={latestMessages[contact.id]?.text}
+                />
               </div>
-            </div>
-          )}
-          {/* Groups Section */}
-          <div className="mt-5 ml-10 mr-2 relative right-8">
-            <p className="poppins-semibold text-[15px]">Groups</p>
-            {groups && groups.length > 0 ? (
-              groups.map((group) => (
-                <div
-                  key={group._id}
-                  onClick={() => handleSelectGroup(group)}
-                  className="cursor-pointer"
-                >
-                  <GroupChat
-                    groupId={group._id} // Pass group ID
-                    Image={group.photo} // Group image
-                    Name={group.title} // Group name
-                    onClick={() => handleSelectGroup(group)} // Group click handler
-                    onDelete={() => deleteGroup(group._id)} // Wrap delete in an arrow function
-                    onModify={() => modifyGroup(group._id)} // Modify group handler
-                  />
-                </div>
-              ))
-            ) : (
-              <p>No groups found</p>
-            )}
-          </div>
+            ))
+          ) : (
+            <p>No members found</p>
+          )
+        )}
+      </div>
+    </div>
+  )}
+  {showGroupOptions && selectedGroup && (
+    <div className="popup-overlay">
+      <div className="popup-content">
+        <p>Edit Group</p>
+        <p>Delete Group</p>
+        <p onClick={() => setShowGroupOptions(false)}>Close</p>
+      </div>
+    </div>
+  )}
+
+  {/* Groups Section */}
+  <div className="mt-5 ml-10 mr-2 relative right-8">
+    <p className="poppins-semibold text-[15px]">Groups</p>
+    {groups && groups.length > 0 ? (
+      groups.map((group) => (
+        <div
+          key={group._id}
+          onClick={() => handleSelectGroup(group)}
+          className="cursor-pointer"
+        >
+          <GroupChat
+            groupId={group._id} // Pass group ID
+            Image={group.photo} // Group image
+            Name={group.title} // Group name
+            onClick={() => handleSelectGroup(group)} // Group click handler
+            onDelete={() => deleteGroup(group._id)} // Wrap delete in an arrow function
+            onModify={() => modifyGroup(group._id)} // Modify group handler
+            isAdmin={group.isAdmin}
+          />
         </div>
+      ))
+    ) : (
+      <p>No groups found</p>
+    )}
+  </div>
+</div>
+
 
         {/* Right Side - Chat Area */}
         {/* Right Side - Chat Area */}

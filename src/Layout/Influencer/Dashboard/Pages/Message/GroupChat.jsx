@@ -12,10 +12,12 @@ const GroupChat = ({
   onClick,
   onDelete,
   onModify,
+  isAdmin,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
+  
   const deleteGroup = async (groupId) => {
     try {
       console.log("Group deleted:", groupId);
@@ -68,7 +70,7 @@ const GroupChat = ({
             >
               &#x22EE; {/* Three vertical dots */}
             </button>
-            {isMenuOpen && (
+            {isAdmin &&isMenuOpen && (
   <div
     ref={menuRef}
     className="absolute right-0 mt-2 w-auto bg-white border border-gray-300 rounded shadow-lg z-10"
