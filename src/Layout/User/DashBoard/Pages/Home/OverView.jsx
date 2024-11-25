@@ -72,6 +72,7 @@ const OverView = () => {
                                 userImage={post.author.photo}
                                 userName={post.author.fullName}
                                 postTime={new Date(post.postedAt).toLocaleString()}
+                                localTime={post.postedAt}
                                 postImage={post.blogMainImg}
                                 likesCount={post.likes}
                                 postTitle={post.title}
@@ -104,7 +105,7 @@ const OverView = () => {
     );
 };
 
-const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle, postID, isLiked, isSaved, commentsCount, postBody }) => {
+const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle, postID, isLiked, isSaved, commentsCount, postBody, localTime }) => {
   const [imageDimensions, setImageDimensions] = useState({ width: 'auto', height: 'auto' });
   const [liked, setLiked] = useState(isLiked);
   const [savedPost, setSavedPost] = useState(isSaved);
@@ -181,38 +182,27 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
 
   const monitorReachCount = async () => {
     try {
-      // Check if postTime is a valid string
-      if (!postTime || typeof postTime !== 'string') {
-        console.error("Invalid postTime:", postTime);
-        return; // Exit early if postTime is not valid
+      // Check if localTime is a valid string
+      if (!localTime || typeof localTime !== 'string') {
+        console.error("Invalid localTime:", localTime);
+        return; // Exit early if localTime is not valid
       }
   
-      // Manually extract the date part (MM/DD/YYYY) from postTime
-      const [datePart] = postTime.split(','); // "MM/DD/YYYY"
-      if (!datePart) {
-        console.error("Date part extraction failed:", postTime);
-        return; // Exit early if date extraction fails
-      }
+      // Parse the ISO string to a Date object
+      const date = new Date(localTime);
   
-      const [day, month, year] = datePart.split('/'); // Extract month, day, year
+      // Extract the year, month, and day
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+      const day = String(date.getDate()).padStart(2, '0');
   
-      // Check if the extracted values are valid
-      if (!month || !day || !year) {
-        console.error("Invalid date format:", datePart);
-        return; // Exit early if the date format is invalid
-      }
-  
-      // Construct a valid date string in 'YYYY-MM-DD' format to ensure correct Date parsing
-      const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-  
-      // Convert the formattedDate string to a Date object
-      const date = new Date(formattedDate);
-  
-      // Extract the year and month (formatted as 'YYYY-MM')
-      const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      // Format as 'YYYY-MM' for yearMonth
+      const yearMonth = `${year}-${month}`;
+      console.log("Date is: ", yearMonth);
   
       // Send blogId and yearMonth in the request
-      await axios.put('/influencer/addReachCount', 
+      await axios.put(
+        '/influencer/addReachCount', 
         { blogId: postID, month: yearMonth }, // Payload with blogId and month
         {
           headers: {
@@ -224,7 +214,7 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
     } catch (error) {
       console.error("Error updating reach count:", error);
     }
-  };
+  };  
 
   const handleScroll = () => {
     if (postRef.current) {
@@ -247,34 +237,22 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
   const monitorVisitCount = async () => {
     try {
       // Check if postTime is a valid string
-      if (!postTime || typeof postTime !== 'string') {
-        console.error("Invalid postTime:", postTime);
+      if (!localTime || typeof localTime !== 'string') {
+        console.error("Invalid postTime:", localTime);
         return; // Exit early if postTime is not valid
       }
   
-      // Manually extract the date part (MM/DD/YYYY) from postTime
-      const [datePart] = postTime.split(','); // "MM/DD/YYYY"
-      if (!datePart) {
-        console.error("Date part extraction failed:", postTime);
-        return; // Exit early if date extraction fails
-      }
+      // Parse the ISO string to a Date object
+      const date = new Date(localTime);
   
-      const [day, month, year] = datePart.split('/'); // Extract month, day, year
+      // Extract the year, month, and day
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+      const day = String(date.getDate()).padStart(2, '0');
   
-      // Check if the extracted values are valid
-      if (!month || !day || !year) {
-        console.error("Invalid date format:", datePart);
-        return; // Exit early if the date format is invalid
-      }
-  
-      // Construct a valid date string in 'YYYY-MM-DD' format to ensure correct Date parsing
-      const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-  
-      // Convert the formattedDate string to a Date object
-      const date = new Date(formattedDate);
-  
-      // Extract the year and month (formatted as 'YYYY-MM')
-      const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      // Format as 'YYYY-MM' for yearMonth
+      const yearMonth = `${year}-${month}`;
+      console.log("Date is: ", yearMonth);
   
       // Send blogId and yearMonth in the request
       await axios.put('/influencer/minitorVisitCount', 
@@ -285,7 +263,7 @@ const Post = ({ userImage, userName, postTime, postImage, likesCount, postTitle,
           }
         }
       );
-      console.log("Reach count updated successfully");
+      console.log("Visits count updated successfully");
     } catch (error) {
       console.error("Error updating reach count:", error);
     }

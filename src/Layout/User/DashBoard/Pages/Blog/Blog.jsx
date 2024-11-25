@@ -70,6 +70,7 @@ const Blog = () => {
               Title={post.title}
               Body={post.body}
               Time={new Date(post.postedAt).toLocaleString()}
+              localTime={post.postedAt}
               Image={post.blogMainImg}
               Likes={post.likes}
               commentsCount={post.commentsCount}
@@ -92,7 +93,7 @@ const Blog = () => {
   );
 };
 
-const BlogPost = ({ ID, Title, Body, Time, Image, Likes, commentsCount, IsLiked }) => {
+const BlogPost = ({ ID, Title, Body, Time, Image, Likes, commentsCount, IsLiked, localTime }) => {
   const [liked, setLiked] = useState(IsLiked); // Initialize with the liked status
   const [likesCount, setLikesCount] = useState(Likes); // Initialize with the likes count
   const truncatedBody = Body.length > 250 ? Body.substring(0, 250) + '...' : Body;
@@ -129,34 +130,22 @@ const BlogPost = ({ ID, Title, Body, Time, Image, Likes, commentsCount, IsLiked 
   const monitorVisitCount = async () => {
     try {
       // Check if postTime is a valid string
-      if (!Time || typeof Time !== 'string') {
-        console.error("Invalid postTime:", Time);
+      if (!localTime || typeof localTime !== 'string') {
+        console.error("Invalid postTime:", localTime);
         return; // Exit early if postTime is not valid
       }
   
-      // Manually extract the date part (MM/DD/YYYY) from postTime
-      const [datePart] = Time.split(','); // "MM/DD/YYYY"
-      if (!datePart) {
-        console.error("Date part extraction failed:", Time);
-        return; // Exit early if date extraction fails
-      }
+      // Parse the ISO string to a Date object
+      const date = new Date(localTime);
   
-      const [day, month, year] = datePart.split('/'); // Extract month, day, year
+      // Extract the year, month, and day
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+      const day = String(date.getDate()).padStart(2, '0');
   
-      // Check if the extracted values are valid
-      if (!month || !day || !year) {
-        console.error("Invalid date format:", datePart);
-        return; // Exit early if the date format is invalid
-      }
-  
-      // Construct a valid date string in 'YYYY-MM-DD' format to ensure correct Date parsing
-      const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-  
-      // Convert the formattedDate string to a Date object
-      const date = new Date(formattedDate);
-  
-      // Extract the year and month (formatted as 'YYYY-MM')
-      const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      // Format as 'YYYY-MM' for yearMonth
+      const yearMonth = `${year}-${month}`;
+      console.log("Date is: ", yearMonth);
   
       // Send blogId and yearMonth in the request
       await axios.put('/influencer/minitorVisitCount', 
@@ -167,7 +156,7 @@ const BlogPost = ({ ID, Title, Body, Time, Image, Likes, commentsCount, IsLiked 
           }
         }
       );
-      console.log("Reach count updated successfully");
+      console.log("Visits count updated successfully");
     } catch (error) {
       console.error("Error updating reach count:", error);
     }
