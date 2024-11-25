@@ -10,6 +10,7 @@ const proxyConfig = {
   '/Brand': 'http://localhost:3000', // Proxying Brand routes for blogs and campaigns
   '/Newauth/users': 'http://localhost:3000',
   '/Newauth/auth': 'http://localhost:3000',
+  '/report': 'http://localhost:3000',
   // Add more proxies as needed based on your backend routes
 };
 

@@ -1,11 +1,25 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import Report from './Report';
 
 const Content = () => {
+  const [showReportForm, setShowReportForm] = useState(false); // State to toggle report form visibility
+
+  const toggleReportForm = () => {
+    setShowReportForm((prev) => !prev); // Toggle the report form visibility
+  };
+
   return (
     <>
       <div className="w-full max-w-[1200px] mx-auto pt-5 px-4">
         <div className="bg-white rounded-3xl shadow-md p-6">
+          <button
+            onClick={toggleReportForm}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg mb-5"
+          >
+            Report
+          </button>
+          {showReportForm && <Report />}
           <h3 className="text-3xl font-bold mb-6">Saved Posts</h3>
           <Media />
         </div>

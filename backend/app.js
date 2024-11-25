@@ -24,6 +24,7 @@ import userss from './models/user.js'; // User model
 import { storage } from './config/firebase.js';
 import { ref, listAll } from 'firebase/storage';
 import { updateInstagramPostData } from './controllers/extracter.js';
+import report from './routes/extract.js';
 
 import NewUserRoutes from './routes/NewAuth/users.js';
 import NewAuthRoutes from './routes/NewAuth/auth.js';
@@ -73,6 +74,7 @@ app.use('/api/groups', groupRoutes);
 app.use('/Support',CustomerService)
 app.use("/api/issues",Issues );
 app.use("/SignUpCheck", SignUpCheck);
+app.use("/report", report);
 
 const checkFirebaseConnection = async () => {
   try {

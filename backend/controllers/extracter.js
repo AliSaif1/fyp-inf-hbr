@@ -179,3 +179,57 @@ export const updateInstagramPostData = async () => {
 };
 
 // setInterval(updateInstagramPostData, 1 * 60 * 1000);
+
+// export const getInstagramPostsData = async (profileUrl, postsCount) => {
+//   const options = new chrome.Options();
+//   options.addArguments("--headless"); // Run in headless mode for performance
+//   options.addArguments("--disable-gpu");
+//   options.addArguments("--no-sandbox");
+//   options.addArguments("--disable-dev-shm-usage");
+
+//   const driver = await new Builder().forBrowser("chrome").setChromeOptions(options).build();
+
+//   try {
+//     // Navigate to the specified Instagram profile URL
+//     await driver.get(profileUrl);
+
+//     // Wait for the posts to load
+//     await driver.sleep(5000);
+
+//     // Find all the posts on the page
+//     const postElements = await driver.findElements(By.css(".x1lliihq .html-span")); // Adjust the selector as necessary
+//     const totalPosts = postElements.length;
+
+//     // Determine how many posts to process
+//     const effectivePostsCount = Math.min(totalPosts, postsCount);
+
+//     let postsData = [];
+//     for (let i = 0; i < effectivePostsCount; i++) {
+//       try {
+//         const postElement = postElements[i];
+//         const likes = await postElement.findElement(By.css(".likes-selector")).getText(); // Replace selector
+//         const comments = await postElement.findElement(By.css(".comments-selector")).getText(); // Replace selector
+
+//         postsData.push({
+//           postNumber: i + 1,
+//           likes: parseInt(likes.replace(/,/g, ''), 10),
+//           comments: parseInt(comments.replace(/,/g, ''), 10),
+//         });
+//       } catch (innerError) {
+//         console.error(`Error fetching data for post ${i + 1}:`, innerError);
+//         continue; // Skip to the next post if an error occurs
+//       }
+//     }
+
+//     return {
+//       totalPosts,
+//       extractedPosts: effectivePostsCount,
+//       postsData,
+//     };
+//   } catch (error) {
+//     console.error("Error fetching Instagram posts data:", error);
+//     throw error;
+//   } finally {
+//     await driver.quit();
+//   }
+// };
