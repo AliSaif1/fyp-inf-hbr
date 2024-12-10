@@ -11,6 +11,8 @@ const groupSchema = new mongoose.Schema(
     title: { type: String, required: true },
     admin: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    // followedGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
+    followedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], 
     photo: { type: String }, // Optional: Group profile picture
     messages: [
       {
@@ -21,6 +23,7 @@ const groupSchema = new mongoose.Schema(
     ],
   },
   { timestamps: true }
+  
 );
 
 export default mongoose.model('Group', groupSchema);

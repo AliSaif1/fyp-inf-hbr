@@ -147,6 +147,14 @@ socket.on("sendGroupMessage", async (data) => {
   console.log("Current rooms and members:", io.sockets.adapter.rooms);
 
   try {
+
+     // Check if the user follows the group
+     const user = await userss.findById(sender);
+     if (!user || !user.followedGroups.includes(groupId)) {
+       console.warn(`User ${sender} tried to send a message to a group they do not follow`);
+       socket.emit("error", { message: "You are not allowed to send messages to this group" });
+       return;
+     }
       // Save the message to the database
       const newMessage = {
           sender,

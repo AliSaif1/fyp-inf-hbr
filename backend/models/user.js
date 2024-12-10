@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema({
   verified: { type: Boolean },
   verificationAttachment: { type : String },
   uploaded: { type: Boolean },
+  followedGroups: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],
+    default: [], // Ensure it starts as an empty array
+  },
   verifiedEmail: { type: Boolean ,default:false},
   
   earnings: { type: Number },
@@ -53,11 +57,13 @@ const userSchema = new mongoose.Schema({
   groups: { type: Number }, // Number of groups influencer is part of
 },{ timestamps: true });
 userSchema.methods.setPassword = async function (password) {
+  // eslint-disable-next-line no-undef
   const salt = await bcrypt.genSalt(Number(process.env.SALT));
   this.password = await bcrypt.hash(password, salt);
 };
 
 userSchema.methods.generateAuthToken = function () {
+	// eslint-disable-next-line no-undef
 	const token = jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
 		expiresIn: "7d",
 	});

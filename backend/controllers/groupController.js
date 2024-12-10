@@ -7,6 +7,7 @@ import { ref, uploadBytes, getDownloadURL ,deleteObject } from 'firebase/storage
 // Import Group model
 // import Group from '../models/Group.js';
 
+
 // Create a new group
 export const createGroup = async (req, res) => {
   const { title, members, admin } = req.body;
@@ -239,5 +240,33 @@ export const deleteGroup = async (req, res) => {
     console.error('Error deleting group:', error);
     // Send error response with detailed message
     res.status(500).json({ message: 'Error deleting group', error: error.message, stack: error.stack });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Fetch all groups
+export const getAllGroups = async (req, res) => {
+  try {
+    const groups = await Group.find()
+      .populate('admin', 'fullName')
+      .populate('members', 'fullName');
+    res.status(200).json(groups);
+  } catch (error) {
+    console.error('Error fetching groups:', error);
+    res.status(500).json({ message: 'Error fetching groups' });
   }
 };

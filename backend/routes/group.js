@@ -6,18 +6,28 @@ import {
   sendGroupMessage,
   getGroupMessagesByGroupId,
   getGroups,
+  getAllGroups,
   modifyGroup,
   deleteGroup
 } from '../controllers/groupController.js';
+import { toggleFollowGroup, checkFollowStatus, unfollowGroup } from '../controllers/FollowGroup.js';
 import multer from 'multer';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Route for modifying a group
-router.put('/group/modify/:groupId', upload.single('photo'), modifyGroup); 
 
-// Route for deleting a group
+router.post('/follow', toggleFollowGroup);
+// Check Follow Status for a Group
+router.get('/follow', checkFollowStatus);
+// Unfollow a group
+router.post('/unfollow', unfollowGroup);
+
+
+
+
+router.put('/group/modify/:groupId', upload.single('photo'), modifyGroup);
+router.get('/all', getAllGroups);   // Fetch all groups 
 router.delete('/group/delete/:groupId', deleteGroup);
 router.get('/:groupId/messages', getGroupMessagesByGroupId);
 
