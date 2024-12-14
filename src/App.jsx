@@ -43,7 +43,7 @@ const App = () => {
 
 
 
-
+{/* 
           <Routes>
 
             <Route path="/check/users/:id/reset-password/:token" element={<PasswordReset />} />
@@ -62,13 +62,13 @@ const App = () => {
             <Route path="/*" element={<Authentication />} />
 
 
-          </Routes>
+          </Routes> */}
 
 
 
-{/* <Routes>
+<Routes>
   <Route path='/*' element={<CustomerRoutes/>}/>
-</Routes> */}
+</Routes>
 
         </BrowserRouter>
 
