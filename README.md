@@ -106,9 +106,49 @@ It allows **brands** to:
 ```bash
 git clone https://github.com/yourusername/influencer-harbor.git
 cd influencer-harbor
+```
 
-- Authors
-Ali Saif
-Rizwan Sabir
-Hanzla Mirza
+### 2. Install Dependencies
+
+```bash
+npm install
+# or
+yarn install
+```
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the root directory with the necessary variables:
+
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+FIREBASE_API_KEY=your_firebase_api_key
+# Add any other required configs
+```
+
+### 4. Run the Server
+
+```bash
+npm run dev
+```
+
+### 5. Run the Mobile App (React Native)
+
+Follow React Native setup instructions for your environment:
+```bash
+cd mobile
+npm install
+npx react-native run-android
+# or
+npx react-native run-ios
+```
+
+---
+
+## 👨‍💻 Authors
+
+- **Ali Saif** – [LinkedIn](https://www.linkedin.com/in/ali-saif-ba5159223/)
+- **Rizwan Sabir**
+- **Hanzla Mirza**
 
