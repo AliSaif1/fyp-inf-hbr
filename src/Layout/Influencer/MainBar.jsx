@@ -24,7 +24,7 @@ import ErrorPage from './Dashboard/Pages/ErrorPage/ErrorPage';
 import UserProfile from '../../Components/DashBoardTemplate/userProfile';
 import EditBlog from './Dashboard/Pages/Blog/EditBlog';
 import CreateGroupPage from './Dashboard/Pages/Message/CreateGroupPage';
-import Settings from '../../Components/DashboardTemplate/Dashboard/Settings';
+import Settings from '../../Components/DashBoardTemplate/DashBoard/Settings';
 
 const MainBar = () => {
   return (
