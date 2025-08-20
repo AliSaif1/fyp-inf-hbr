@@ -18,7 +18,7 @@ import useCurrentScreenSize from './useCurrentScreenSize';
 import ScreenSizeDisplay from '../../useCurrentScreenSize';
 import IssueProfile from '../Model/IssueProfile';
 import Modal from './Model';
-import Brand from './brand';
+import Brand from './Brand';
 import PaymentModel from './PaymentModel';
 import InfluencerModel from './InfluencerModel';
 import WithDrawModel from './WithDrawModel';
