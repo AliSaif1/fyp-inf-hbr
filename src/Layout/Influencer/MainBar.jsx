@@ -23,8 +23,8 @@ import Info from './Dashboard/Pages/Info/Info';
 import ErrorPage from './Dashboard/Pages/ErrorPage/ErrorPage';
 import UserProfile from '../../Components/DashBoardTemplate/userProfile';
 import EditBlog from './Dashboard/Pages/Blog/EditBlog';
-import CreateGroupPage from './DashBoard/Pages/Message/CreateGroupPage';
-import Settings from '../../Components/DashBoardTemplate/DashBoard/Settings';
+import CreateGroupPage from './Dashboard/Pages/Message/CreateGroupPage';
+import Settings from '../../Components/DashboardTemplate/DashBoard/Settings';
 
 const MainBar = () => {
   return (
