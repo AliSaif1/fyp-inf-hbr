@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { CampaignContext } from './CurrentCompaign';
-import './index.css';
+// import './index.css';
 
 const SendInvitation = ({ influencersOptions, selectedInfluencers, spendings, campaignBudget, handleChange }) => {
   const campaignData = useContext(CampaignContext);
