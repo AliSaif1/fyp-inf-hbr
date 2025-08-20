@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import Brand from './brand';
+import Brand from './Brand';
 
 const InfluencerModel = ({ rowData, onClose, Update, setUpdate }) => {
     const contractLinkRef = useRef(null);
